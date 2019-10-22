@@ -7,15 +7,14 @@ import nasa_hls
 #
 # print(type(available_tiles))
 
-# returns list
-urls_datasets = nasa_hls.get_available_datasets(products=["L30", "S30"],
-                                                years=[2018],
-                                                tiles=["32UNU", "32UPU"])  # here to be prompted a shape
-print("Number of datasets: ", len(urls_datasets))
-print("First datasets:\n -", "\n - ".join(urls_datasets[:3]))
-print("Last datasets:\n -", "\n - ".join(urls_datasets[-3:]))
 
-"Konstis input"
-"robins input"
+# returns dataframe
+df_datasets = nasa_hls.get_available_datasets(products=["L30", "S30"],
+                                              years=[2018],
+                                              tiles=["32UNU", "32UPU"],
+                                              return_list=False) 
 
+print("Number of datasets: ", df_datasets.shape[0])
+print(df_datasets.head(3))
+print(df_datasets.tail(3))
 
