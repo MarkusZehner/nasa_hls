@@ -6,7 +6,7 @@ from geopandas.tools import sjoin
 import matplotlib.pyplot as plt
 
 
-def download_test_tiles():
+def download_hls_s2_tiles():
 
     url = "https://hls.gsfc.nasa.gov/wp-content/uploads/2018/10/hls_s2_tiles.zip"
     local_path = "ignored/test_tiles/"
@@ -20,6 +20,7 @@ def download_test_tiles():
     path_to_test_tiles = local_path + "hls_s2_tiles.shp"
 
     return path_to_test_tiles
+
 
 
 #path_to_user_poly = input("enter the complete path to the shapefile of your working area")
@@ -37,3 +38,5 @@ intersections= gp.sjoin(user_poly, test_tiles, how="inner", op='intersects')
 # write ids in list
 names = intersections["Name"].tolist()
 print(names)
+
+
