@@ -7,6 +7,15 @@ import matplotlib.pyplot as plt
 
 
 def download_hls_s2_tiles():
+    """
+    Docstring
+    ----------------------------
+    input:
+    ----------------------------
+    returns: 
+        path to shapefile with nasa hls test sites
+
+    """
 
     url = "https://hls.gsfc.nasa.gov/wp-content/uploads/2018/10/hls_s2_tiles.zip"
     local_path = "ignored/test_tiles/"
