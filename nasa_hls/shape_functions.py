@@ -2,10 +2,19 @@ import zipfile
 import requests
 import geopandas as gp
 import io
-from geopandas.tools import sjoin
+import matplotlib.pyplot as plt
 
 
-def download_test_tiles():
+def download_hls_s2_tiles():
+    """
+    Docstring
+    ----------------------------
+    input:
+    ----------------------------
+    returns: 
+        path to shapefile with nasa hls test sites
+
+    """
 
     url = "https://hls.gsfc.nasa.gov/wp-content/uploads/2018/10/hls_s2_tiles.zip"
     local_path = "ignored/test_tiles/"
@@ -20,11 +29,26 @@ def download_test_tiles():
 
     return path_to_test_tiles
 
+def get_tiles_from_shape(user_polygon):
 
-path_to_user_poly = input("enter the complete path to the shapefile of your working area")
-path_to_user_poly = "/home/aleko-kon/projects/geo419/nasa-hls/ignored/user_shape/dummy_region.shp"
+    # performing geometric intersection
+    intersections = gp.sjoin(user_polygon, test_tiles, how="inner", op='intersects')
 
-user_poly = gp.GeoDataFrame.from_file(path_to_user_poly)
-test_tiles = gp.GeoDataFrame.from_file(download_test_tiles())
-intersections= gp.sjoin(user_poly, test_tiles, how="inner", op='intersects')
-intersections
+    # write UTM-codes in list
+    names = intersections["Name"].tolist()
+    print(f"The following UTM-tiles are intersecting with the input geometry:\n"
+          f"{names}")
+
+    return names
+
+path_to_user_polygon = "/home/aleko-kon/projects/geo419/nasa-hls/ignored/user_shape/dummy_region.shp"
+user_polygon = gp.GeoDataFrame.from_file(path_to_user_polygon)
+test_tiles = gp.GeoDataFrame.from_file(download_hls_s2_tiles())
+
+
+get_tiles_from_shape(user_polygon)
+
+# # Plot the data
+# fig, ax = plt.subplots(figsize=(12, 8))
+# user_poly.plot(alpha=.5, ax=ax)
+# plt.show()
