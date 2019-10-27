@@ -77,3 +77,4 @@ target/
 
 #venv
 venv
+/ignored/*
