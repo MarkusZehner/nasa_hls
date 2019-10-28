@@ -31,21 +31,27 @@ def download_hls_s2_tiles():
     return path_to_test_tiles
 
 
+def download_from_shape():
+    pass
 
-#path_to_user_poly = input("enter the complete path to the shapefile of your working area")
-path_to_user_poly = "/home/robin/Desktop/user_shape/dummy_region.shp"
+def tiles_list():
+    #path_to_user_poly = input("enter the complete path to the shapefile of your working area")
+    path_to_user_poly = "/home/robin/Desktop/user_shape/dummy_region.shp"
 
-user_poly = gp.GeoDataFrame.from_file(path_to_user_poly)
-test_tiles = gp.GeoDataFrame.from_file(download_test_tiles())
-intersections= gp.sjoin(user_poly, test_tiles, how="inner", op='intersects')
+    user_poly = gp.GeoDataFrame.from_file(path_to_user_poly)
+    test_tiles = gp.GeoDataFrame.from_file(download_test_tiles())
+    intersections= gp.sjoin(user_poly, test_tiles, how="inner", op='intersects')
 
-# # Plot the data
-# fig, ax = plt.subplots(figsize=(12, 8))
-# user_poly.plot(alpha=.5, ax=ax)
-# plt.show()
+    # # Plot the data
+    # fig, ax = plt.subplots(figsize=(12, 8))
+    # user_poly.plot(alpha=.5, ax=ax)
+    # plt.show()
 
-# write ids in list
-names = intersections["Name"].tolist()
-print(names)
+    # write ids in list
+    names = intersections["Name"].tolist()
+    print(names)
+
+    return names
+
 
 
