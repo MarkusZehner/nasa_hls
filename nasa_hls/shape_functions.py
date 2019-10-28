@@ -2,7 +2,6 @@ import zipfile
 import requests
 import geopandas as gp
 import io
-from geopandas.tools import sjoin
 import matplotlib.pyplot as plt
 
 
@@ -30,6 +29,7 @@ def download_hls_s2_tiles():
 
     return path_to_test_tiles
 
+def get_tiles_from_shape(user_polygon):
 
 def download_from_shape():
     pass
