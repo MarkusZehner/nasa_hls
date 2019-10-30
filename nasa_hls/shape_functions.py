@@ -17,7 +17,9 @@ def download_utm_tiles():
     returns:
         0
             
-    """
+    # wilma
+    # 
+    # """
 
     import urllib
     url = "https://hls.gsfc.nasa.gov/wp-content/uploads/2016/03/S2A_OPER_GIP_TILPAR_MPC__20151209T095117_V20150622T000000_21000101T000000_B00.kml"
@@ -45,6 +47,41 @@ def download_utm_tiles():
 
         else:
             print("Input not readable.")
+
+def download_tiles(ds_dir):
+    """
+    Download the Nasa .kml file containing vectors of the global UTM Grid"
+    """
+    import urllib
+    from pathlib import Path
+    
+    url = "https://hls.gsfc.nasa.gov/wp-content/uploads/2016/03/S2A_OPER_GIP_TILPAR_MPC__20151209T095117_V20150622T000000_21000101T000000_B00.kml"
+
+    choice = ""
+
+    while choice != "q":
+        print("\n 'y' to download the 100MB Files")
+        print(" 'n or q' to not download and quit this stage")
+        print("")
+
+        # Ask for users choice
+        choice = input("\n What would you like to do? ")
+
+        #respond to users choice
+        if choice == "y" or "Y":
+            if not Path(dst).exists():
+                try:
+                    urllib.request.urlretrieve(url, dst)
+                except Exception:
+                    log.exception(f"ERROR DURING DOWNLOAD: {dst} FROM {src}.")
+
+        elif choice == "n" or "N":
+            print("thanks for coming by. I wouldn't download it either")
+
+        else:
+            print("\n sorry, didn't understand you. Please try again")
+
+
 
 def download_hls_s2_tiles():
     """
