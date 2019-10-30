@@ -2,6 +2,7 @@ import zipfile
 import requests
 import geopandas as gp
 import io
+import os
 import matplotlib.pyplot as plt
 
 
@@ -11,7 +12,7 @@ def download_hls_s2_tiles():
     ----------------------------
     input:
     ----------------------------
-    returns: 
+    returns:
         path to shapefile with nasa hls test sites
 
     """
@@ -30,22 +31,19 @@ def download_hls_s2_tiles():
     return path_to_test_tiles
 
 def get_tiles_from_shape(user_polygon):
+    pass
 
 def download_from_shape():
     pass
 
 def tiles_list():
-    #path_to_user_poly = input("enter the complete path to the shapefile of your working area")
-    path_to_user_poly = "/home/robin/Desktop/user_shape/dummy_region.shp"
+    #path_to_user_poly = os.getcwd() + "/ignored/user_shape/" + input("enter the local path to the shapefile of your
+    # working area")
+    path_to_user_poly = "/home/aleko-kon/projects/geo419/nasa-hls/ignored/user_shape/dummy_region.shp"
 
     user_poly = gp.GeoDataFrame.from_file(path_to_user_poly)
-    test_tiles = gp.GeoDataFrame.from_file(download_test_tiles())
+    test_tiles = gp.GeoDataFrame.from_file(download_hls_s2_tiles())
     intersections= gp.sjoin(user_poly, test_tiles, how="inner", op='intersects')
-
-    # # Plot the data
-    # fig, ax = plt.subplots(figsize=(12, 8))
-    # user_poly.plot(alpha=.5, ax=ax)
-    # plt.show()
 
     # write ids in list
     names = intersections["Name"].tolist()
@@ -54,4 +52,7 @@ def tiles_list():
     return names
 
 
-
+# # Plot the data
+# fig, ax = plt.subplots(figsize=(12, 8))
+# user_poly.plot(alpha=.5, ax=ax)
+# plt.show()
