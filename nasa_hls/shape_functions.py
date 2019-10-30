@@ -4,6 +4,7 @@ import geopandas as gp
 import io
 import os
 import matplotlib.pyplot as plt
+import sys
 
 
 def download_hls_s2_tiles():
@@ -39,7 +40,8 @@ def download_from_shape():
 def tiles_list():
     #path_to_user_poly = os.getcwd() + "/ignored/user_shape/" + input("enter the local path to the shapefile of your
     # working area")
-    path_to_user_poly = "/home/aleko-kon/projects/geo419/nasa-hls/ignored/user_shape/dummy_region.shp"
+
+    path_to_user_poly = input("enter the local path to the shapefile of your working area")
 
     user_poly = gp.GeoDataFrame.from_file(path_to_user_poly)
     test_tiles = gp.GeoDataFrame.from_file(download_hls_s2_tiles())
