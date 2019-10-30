@@ -6,6 +6,7 @@ import os
 import matplotlib.pyplot as plt
 import sys
 
+def
 
 def download_hls_s2_tiles():
     """
@@ -34,10 +35,7 @@ def download_hls_s2_tiles():
 def get_tiles_from_shape(user_polygon):
     pass
 
-def download_from_shape():
-    pass
-
-def tiles_list():
+def get_available_tiles():
     #path_to_user_poly = os.getcwd() + "/ignored/user_shape/" + input("enter the local path to the shapefile of your
     # working area")
 
@@ -47,7 +45,7 @@ def tiles_list():
     test_tiles = gp.GeoDataFrame.from_file(download_hls_s2_tiles())
     intersections= gp.sjoin(user_poly, test_tiles, how="inner", op='intersects')
 
-    # write ids in list
+    # write id's in list
     names = intersections["Name"].tolist()
     print(names)
 
