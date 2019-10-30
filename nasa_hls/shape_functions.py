@@ -3,9 +3,8 @@ import requests
 import geopandas as gp
 import io
 from pathlib import Path
-import os
-import matplotlib.pyplot as plt
-import sys
+
+# add .kml to the user input dir in download_utm_tiles(), then the end does not have to appended
 
 def download_utm_tiles():
     """
@@ -32,7 +31,7 @@ def download_utm_tiles():
             bool == False
             local_path = input("Location directory of file needed. Type:"
                                "")
-            # local_path = os.getcwd() + "/ignored/UTM_tiles.kml"
+            local_path = local_path + ".kml"
 
             print(f"Downloading kml-file from url {url}...")
             urllib.request.urlretrieve(url, local_path)
@@ -45,6 +44,8 @@ def download_utm_tiles():
 
         else:
             print("Input not readable.")
+
+        return local_path
 
 def download_hls_s2_tiles():
     """
@@ -74,31 +75,40 @@ def get_tiles_from_shape(user_polygon):
     pass
 
 
-    ###################BAUSTELLE####################
-# def get_tiles_from_UTM():
-    #path_to_user_poly = os.getcwd() + "/ignored/user_shape/" + input("enter the local path to the shapefile of your
-    # working area")
+def get_tiles_from_UTM(path_to_UTM_file):
 
-    UTM_tile_path = Path(input("Please input the path to the UTM-file"))
+    path_to_UTM_file = Path("/home/aleko-kon/projects/geo419/nasa-hls/ignored/UTM_tiles.kml")
+    path_to_UTM_file = Path(input("Please input the path to the UTM-file"))
+    # path_to_UTM_file = Path(download_utm_tiles())         # will work when the function called returns local path
 
     try:
-        Path.exists(UTM_tile_path)
+        Path.exists(path_to_UTM_file)
+    except:
+        # if not create the .kml file or give the src dir for the file
+
+        # if kml exists give src dir
+        # else
+            # raise: not found, please download and save in path
+
+    Path.exists(path_to_UTM_file)
 
         # wenn die UTM-tile.kml Datei schon existiert, dann nicht mehr download_utm_tiles call
 
     # Enable fiona driver, then read kml-file
     gp.io.file.fiona.drvsupport.supported_drivers['KML'] = 'rw'
-    df = gp.read_file(local_path, driver='KML')
-    ###################BAUSTELLE####################
+    UTM_tiles = gp.read_file(path_to_UTM_file, driver='KML')
 
+    # search for user polygon - how to make dir inputs properly?
+    # path_to_user_polygon = input("enter the local path to the shapefile of your working area")
+    path_to_user_polygon = Path("/home/aleko-kon/projects/geo419/nasa-hls/ignored/user_shape/dummy_region.shp")
 
-    path_to_user_poly = input("enter the local path to the shapefile of your working area")
+    # convert user_polygon into Gdf
+    user_polygon = gp.GeoDataFrame.from_file(path_to_user_polygon)
 
-    user_poly = gp.GeoDataFrame.from_file(path_to_user_poly)
-    test_tiles = gp.GeoDataFrame.from_file(download_utm_tiles())
-    intersections= gp.sjoin(user_poly, test_tiles, how="inner", op='intersects')
+    # perform intersection
+    intersections= gp.sjoin(user_polygon, UTM_tiles, how="inner", op='intersects')
 
-    # write id's in list
+    # write UTM-codes in list
     tiles = intersections["Name"].tolist()
     print(tiles)
 
