@@ -48,40 +48,40 @@ def download_utm_tiles():
             print("Input not readable.")
 
 
-def download_hls_s2_tiles():
-    """
-    Brauchen wir diese Funktion eigentlich noch?
-    ----------------------------
-    input:
-    ----------------------------
-    returns:
-        path to shapefile with nasa hls test sites
-
-    """
-
-    url = "https://hls.gsfc.nasa.gov/wp-content/uploads/2018/10/hls_s2_tiles.zip"
-    local_path = "ignored/test_tiles/"
-
-    print(f"Downloading shapefile from url {url}...")
-    request = requests.get(url)
-    zip = zipfile.ZipFile(io.BytesIO(request.content))
-    print("DONE")
-    zip.extractall(path=local_path)
-
-    path_to_test_tiles = local_path + "hls_s2_tiles.shp"
-
-    return path_to_test_tiles
+# def download_hls_s2_tiles():
+#     """
+#     Brauchen wir diese Funktion eigentlich noch?
+#     ----------------------------
+#     input:
+#     ----------------------------
+#     returns:
+#         path to shapefile with nasa hls test sites
+#
+#     """
+#
+#     url = "https://hls.gsfc.nasa.gov/wp-content/uploads/2018/10/hls_s2_tiles.zip"
+#     local_path = "ignored/test_tiles/"
+#
+#     print(f"Downloading shapefile from url {url}...")
+#     request = requests.get(url)
+#     zip = zipfile.ZipFile(io.BytesIO(request.content))
+#     print("DONE")
+#     zip.extractall(path=local_path)
+#
+#     path_to_test_tiles = local_path + "hls_s2_tiles.shp"
+#
+#     return path_to_test_tiles
 
 def get_tiles_from_shape(user_polygon):
     pass
 
 
-def get_tiles_from_UTM(path_to_UTM_file):
+def get_requited_tiles_from_UTM(path_to_UTM_file = ""):
 
     path_to_UTM_file = Path("/home/aleko-kon/projects/geo419/nasa-hls/ignored/UTM_tiles.kml")
-    path_to_UTM_file = Path(input("Please input the path to the UTM-file"))
+    # path_to_UTM_file = Path(input("Please input the path to the UTM-file"))
     # path_to_UTM_file = Path(download_utm_tiles())         # will work when the function called returns local path
-    except:
+    # except:
         # if not create the .kml file or give the src dir for the file
 
         # if kml exists give src dir
