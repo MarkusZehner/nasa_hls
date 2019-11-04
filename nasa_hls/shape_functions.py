@@ -72,11 +72,17 @@ def download_utm_tiles():
 #
 #     return path_to_test_tiles
 
-def get_tiles_from_shape(user_polygon):
-    pass
+def get_required_tiles_from_UTM(path_to_UTM_file = "/home/aleko-kon/projects/geo419/nasa-hls/ignored/UTM_tiles.kml"):
+    """
+    :param path_to_UTM_file: requires the path where the Nasa's world-covering UTM.kml file is stored.
+    Do this manually by calling function 'download_utm_tiles'.
 
+    :return: list of tile name [str of 5 digits starting with two numbers] which geographically intersect the user
+    shape and the UTM tiles.
+    """
 
-def get_requited_tiles_from_UTM(path_to_UTM_file = ""):
+    # ask for shape input!
+
 
     path_to_UTM_file = Path("/home/aleko-kon/projects/geo419/nasa-hls/ignored/UTM_tiles.kml")
     # path_to_UTM_file = Path(input("Please input the path to the UTM-file"))
@@ -112,6 +118,7 @@ def get_requited_tiles_from_UTM(path_to_UTM_file = ""):
 
     return tiles
 
+def get_available
 
 # # Plot the data
 # fig, ax = plt.subplots(figsize=(12, 8))
