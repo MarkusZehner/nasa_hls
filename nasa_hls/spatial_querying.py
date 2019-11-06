@@ -30,7 +30,7 @@ import nasa_hls
 #
 #     return path_to_test_tiles
 
-def get_required_tiles_from_UTM(path_to_utm_file="/home/aleko-kon/projects/geo419/nasa-hls/ignored/UTM_tiles.kml",
+def get_required_tiles_from_utm(path_to_utm_file="/home/aleko-kon/projects/geo419/nasa-hls/ignored/UTM_tiles.kml",
                                 user_shape="/home/aleko-kon/projects/geo419/nasa-hls/ignored/user_shape/dummy_region.shp"):
     """
     :param path_to_utm_file: requires the path where the Nasa's world-covering UTM.kml file is stored.
@@ -61,12 +61,13 @@ def get_required_tiles_from_UTM(path_to_utm_file="/home/aleko-kon/projects/geo41
 
     return tiles
 
+
 def get_available_datasets_from_tiles(products=["S30"],
                                      years=[2018],
                                      user_shape="/home/aleko-kon/projects/geo419/nasa-hls/ignored/user_shape/dummy_region.shp"):
 
     # retrieve required tiles from the function above
-    tiles = get_required_tiles_from_UTM(user_shape=user_shape)
+    tiles = get_required_tiles_from_utm(user_shape=user_shape)
     datasets = nasa_hls.get_available_datasets(products=products, years=years, tiles=tiles)
 
     return datasets
