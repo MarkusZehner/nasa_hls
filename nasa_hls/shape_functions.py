@@ -3,6 +3,8 @@ import requests
 import geopandas as gp
 import io
 from pathlib import Path
+import nasa_hls
+
 
 # add .kml to the user input dir in download_utm_tiles(), then the end does not have to appended
 
@@ -26,8 +28,8 @@ def download_utm_tiles():
 
     while bool == True:
         usr_inp = input("Are you sure if you want to download the NASA's global UTM-tiles?"
-                     "\n~100MB memory is required"
-                     "\n[y/N]")
+                        "\n~100MB memory is required"
+                        "\n[y/N]")
 
         if usr_inp == "y":
             bool == False
@@ -72,10 +74,13 @@ def download_utm_tiles():
 #
 #     return path_to_test_tiles
 
-def get_required_tiles_from_UTM(path_to_UTM_file = "/home/aleko-kon/projects/geo419/nasa-hls/ignored/UTM_tiles.kml"):
+def get_required_tiles_from_UTM(path_to_UTM_file="/home/aleko-kon/projects/geo419/nasa-hls/ignored/UTM_tiles.kml",
+                                user_shape="/home/aleko-kon/projects/geo419/nasa-hls/ignored/user_shape/dummy_region.shp"):
     """
     :param path_to_UTM_file: requires the path where the Nasa's world-covering UTM.kml file is stored.
     Do this manually by calling function 'download_utm_tiles'.
+
+    User polygon as input!!!!!!!!!!!!
 
     :return: list of tile name [str of 5 digits starting with two numbers] which geographically intersect the user
     shape and the UTM tiles.
@@ -83,20 +88,19 @@ def get_required_tiles_from_UTM(path_to_UTM_file = "/home/aleko-kon/projects/geo
 
     # ask for shape input!
 
-
-    path_to_UTM_file = Path("/home/aleko-kon/projects/geo419/nasa-hls/ignored/UTM_tiles.kml")
+    path_to_UTM_file = Path(path_to_UTM_file)
     # path_to_UTM_file = Path(input("Please input the path to the UTM-file"))
     # path_to_UTM_file = Path(download_utm_tiles())         # will work when the function called returns local path
     # except:
-        # if not create the .kml file or give the src dir for the file
+    # if not create the .kml file or give the src dir for the file
 
-        # if kml exists give src dir
-        # else
-            # raise: not found, please download and save in path
+    # if kml exists give src dir
+    # else
+    # raise: not found, please download and save in path
 
     Path.exists(path_to_UTM_file)
 
-        # wenn die UTM-tile.kml Datei schon existiert, dann nicht mehr download_utm_tiles call
+    # wenn die UTM-tile.kml Datei schon existiert, dann nicht mehr download_utm_tiles call
 
     # Enable fiona driver, then read kml-file
     gp.io.file.fiona.drvsupport.supported_drivers['KML'] = 'rw'
@@ -104,21 +108,36 @@ def get_required_tiles_from_UTM(path_to_UTM_file = "/home/aleko-kon/projects/geo
 
     # search for user polygon - how to make dir inputs properly?
     # path_to_user_polygon = input("enter the local path to the shapefile of your working area")
-    path_to_user_polygon = Path("/home/aleko-kon/projects/geo419/nasa-hls/ignored/user_shape/dummy_region.shp")
+    path_to_user_polygon = Path(user_shape)
 
     # convert user_polygon into Gdf
     user_polygon = gp.GeoDataFrame.from_file(path_to_user_polygon)
 
     # perform intersection
-    intersections= gp.sjoin(user_polygon, UTM_tiles, how="inner", op='intersects')
+    intersections = gp.sjoin(user_polygon, UTM_tiles, how="inner", op='intersects')
 
-    # write UTM-codes in list
+    # write UTM-codes in lis
     tiles = intersections["Name"].tolist()
     print(tiles)
 
     return tiles
 
-def get_available
+def get_available_dataset_from_tiles(products=["L30", "S30"],
+                                     years=[2018],
+                                     user_shape="/home/aleko-kon/projects/geo419/nasa-hls/ignored/user_shape/dummy_region.shp"):
+
+    # retrieve required tiles from the function above
+    tiles = get_required_tiles_from_UTM(user_shape=user_shape)
+    datasets = nasa_hls.get_available_datasets(products=products, years=years, tiles=tiles)
+
+    return datasets
+
+# testing zone
+datasets = get_available_dataset_from_tiles()
+
+print("Number of datasets: ", len(datasets))
+print("First datasets:\n -", "\n - ".join(datasets[:3]))
+print("Last datasets:\n -", "\n - ".join(datasets[-3:]))
 
 # # Plot the data
 # fig, ax = plt.subplots(figsize=(12, 8))
