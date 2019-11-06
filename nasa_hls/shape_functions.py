@@ -6,50 +6,6 @@ from pathlib import Path
 import nasa_hls
 
 
-# add .kml to the user input dir in download_utm_tiles(), then the end does not have to appended
-
-def download_utm_tiles():
-    """
-    Function to solely download the NASA's kml file containing vectors of the global UTM grid.
-    As the file needs ~100MB memory, the user is asked to download the file manually with the following code
-    ----------------------------
-    No input
-    ----------------------------
-    returns:
-        0
-            
-    # wilma
-    # 
-    # """
-
-    import urllib
-    url = "https://hls.gsfc.nasa.gov/wp-content/uploads/2016/03/S2A_OPER_GIP_TILPAR_MPC__20151209T095117_V20150622T000000_21000101T000000_B00.kml"
-    bool = True
-
-    while bool == True:
-        usr_inp = input("Are you sure if you want to download the NASA's global UTM-tiles?"
-                        "\n~100MB memory is required"
-                        "\n[y/N]")
-
-        if usr_inp == "y":
-            bool == False
-            local_path = input("Location directory of file needed. Type:"
-                               "")
-            local_path = local_path + ".kml"
-
-            print(f"Downloading kml-file from url {url}...")
-            urllib.request.urlretrieve(url, local_path)
-
-        elif bool == "N":
-            print("aborted."
-                  "It's cleary to big for your Mac."
-                  "LINUX LOVE")
-            bool == False
-
-        else:
-            print("Input not readable.")
-
-
 # def download_hls_s2_tiles():
 #     """
 #     Brauchen wir diese Funktion eigentlich noch?
@@ -74,41 +30,24 @@ def download_utm_tiles():
 #
 #     return path_to_test_tiles
 
-def get_required_tiles_from_UTM(path_to_UTM_file="/home/aleko-kon/projects/geo419/nasa-hls/ignored/UTM_tiles.kml",
+def get_required_tiles_from_UTM(path_to_utm_file="/home/aleko-kon/projects/geo419/nasa-hls/ignored/UTM_tiles.kml",
                                 user_shape="/home/aleko-kon/projects/geo419/nasa-hls/ignored/user_shape/dummy_region.shp"):
     """
-    :param path_to_UTM_file: requires the path where the Nasa's world-covering UTM.kml file is stored.
+    :param path_to_utm_file: requires the path where the Nasa's world-covering UTM.kml file is stored.
     Do this manually by calling function 'download_utm_tiles'.
-
-    User polygon as input!!!!!!!!!!!!
 
     :return: list of tile name [str of 5 digits starting with two numbers] which geographically intersect the user
     shape and the UTM tiles.
     """
 
-    # ask for shape input!
-
-    path_to_UTM_file = Path(path_to_UTM_file)
-    # path_to_UTM_file = Path(input("Please input the path to the UTM-file"))
-    # path_to_UTM_file = Path(download_utm_tiles())         # will work when the function called returns local path
-    # except:
-    # if not create the .kml file or give the src dir for the file
-
-    # if kml exists give src dir
-    # else
-    # raise: not found, please download and save in path
-
-    Path.exists(path_to_UTM_file)
-
-    # wenn die UTM-tile.kml Datei schon existiert, dann nicht mehr download_utm_tiles call
+    path_to_utm_file = Path(path_to_utm_file)
+    Path.exists(path_to_utm_file)
+    path_to_user_polygon = Path(user_shape)
 
     # Enable fiona driver, then read kml-file
     gp.io.file.fiona.drvsupport.supported_drivers['KML'] = 'rw'
-    UTM_tiles = gp.read_file(path_to_UTM_file, driver='KML')
+    UTM_tiles = gp.read_file(path_to_utm_file, driver='KML')
 
-    # search for user polygon - how to make dir inputs properly?
-    # path_to_user_polygon = input("enter the local path to the shapefile of your working area")
-    path_to_user_polygon = Path(user_shape)
 
     # convert user_polygon into Gdf
     user_polygon = gp.GeoDataFrame.from_file(path_to_user_polygon)
@@ -122,7 +61,7 @@ def get_required_tiles_from_UTM(path_to_UTM_file="/home/aleko-kon/projects/geo41
 
     return tiles
 
-def get_available_dataset_from_tiles(products=["L30", "S30"],
+def get_available_datasets_from_tiles(products=["S30"],
                                      years=[2018],
                                      user_shape="/home/aleko-kon/projects/geo419/nasa-hls/ignored/user_shape/dummy_region.shp"):
 
@@ -132,8 +71,11 @@ def get_available_dataset_from_tiles(products=["L30", "S30"],
 
     return datasets
 
+
+
 # testing zone
-datasets = get_available_dataset_from_tiles()
+datasets = get_available_datasets_from_tiles(products=["S30"],
+                                             years=[2019])
 
 print("Number of datasets: ", len(datasets))
 print("First datasets:\n -", "\n - ".join(datasets[:3]))
