@@ -2,6 +2,35 @@ from pathlib import Path
 import geopandas as gp
 import nasa_hls
 
+def download_kml(dst):
+    """
+    Download the necessary .kml-file
+    """
+
+    print("'y'  to download the ~ 100MB Files")
+    print("'q'  to not download and quit this stage")
+    print("")
+
+    choice = input("What would you like to do?")
+
+
+    while choice != "q":
+        
+        if choice == "y":
+            if path.exists(dst) == False:
+                src = ("https://hls.gsfc.nasa.gov/wp-content/uploads/2016/03/S2A_OPER_GIP_TILPAR_MPC__20151209T095117_V20150622T000000_21000101T000000_B00.kml")
+                urllib.request.urlretrieve(src, dst)
+                return dst
+            else:
+                print("sorry, this path already exists")
+                break
+        
+        elif choice == "q":
+            break   
+        else:
+            choice = input("Sorry I did't quite get it")
+
+
 
 def get_required_tiles_from_utm(path_to_utm_file="/home/aleko-kon/projects/geo419/nasa-hls/ignored/UTM_tiles.kml",
                                 user_shape="/home/aleko-kon/projects/geo419/nasa-hls/ignored/user_shape/dummy_region.shp"):
