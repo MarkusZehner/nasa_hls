@@ -40,8 +40,8 @@ def download_kml(dst):
             choice = input("Sorry I did't quite get it")
 
 
-def get_required_tiles_from_utm(path_to_utm_file="/home/aleko-kon/projects/geo419/nasa-hls/ignored/UTM_tiles.kml",
-                                user_shape="/home/aleko-kon/projects/geo419/nasa-hls/ignored/user_shape/dummy_region.shp"):
+def get_required_tiles_from_utm(path_to_utm_file="ignored/UTM_tiles.kml",
+                                user_shape="ignored/user_shape/dummy_region.shp"):
     """
     :param path_to_utm_file: requires the path where the Nasa's world-covering UTM.kml file is stored.
     Do this manually by calling function 'download_utm_tiles'.
@@ -73,9 +73,12 @@ def get_required_tiles_from_utm(path_to_utm_file="/home/aleko-kon/projects/geo41
 
 def get_available_datasets_from_tiles(products=["S30"],
                                       years=[2018],
-                                      user_shape="/home/aleko-kon/projects/geo419/nasa-hls/ignored/user_shape/dummy_region_europe.shp"):
+                                      user_shape="ignored/user_shape/dummy_region_europe.shp"):
     # retrieve required tiles from the function above
     tiles = get_required_tiles_from_utm(user_shape=user_shape)
     datasets = nasa_hls.get_available_datasets(products=products, years=years, tiles=tiles, return_list=False)
 
     return datasets
+
+if __name__ == "__main__":
+    get_available_datasets_from_tiles()
