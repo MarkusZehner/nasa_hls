@@ -73,7 +73,8 @@ def get_required_tiles_from_utm(path_to_utm_file="ignored/UTM_tiles.kml",
 
 def get_available_datasets_from_tiles(products=["S30"],
                                       years=[2018],
-                                      user_shape="ignored/user_shape/dummy_region_europe.shp"):
+                                      user_shape="ignored/user_shape/dummy_region_europe.shp",
+                                      return_list = False):
     # retrieve required tiles from the function above
     tiles = get_required_tiles_from_utm(user_shape=user_shape)
     datasets = nasa_hls.get_available_datasets(products=products, years=years, tiles=tiles, return_list=False)

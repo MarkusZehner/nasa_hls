@@ -18,5 +18,6 @@ from .download_hls_dataset import download
 from .download_hls_dataset import download_batch
 from .spatial_querying import get_available_datasets_from_tiles
 from .spatial_querying import get_required_tiles_from_utm
+from .spatial_querying import download_kml
 
 
