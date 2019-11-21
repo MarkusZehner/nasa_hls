@@ -7,14 +7,20 @@ import geopandas as gp
 import nasa_hls
 
 
-def download_kml(dst):
+def download_kml():
     """
     Download the necessary .kml-file
 
     :param dst: desired destination
 
+
     :return: destination of the .kml-file
     """
+
+    # erstelle pfad
+    # existiert order
+    # existiert datei
+    # wenn nicht: download
 
     print("'y'  to download the ~ 100MB Files")
     print("'q'  to not download and quit this stage")
@@ -58,6 +64,10 @@ def get_required_tiles_from_utm(path_to_utm_file="ignored/UTM_tiles.kml",
     gp.io.file.fiona.drvsupport.supported_drivers['KML'] = 'rw'
     UTM_tiles = gp.read_file(path_to_utm_file, driver='KML')
 
+    # if not proj is crs WGS84:
+    # ändere
+
+
     # convert user_polygon into Gdf
     user_polygon = gp.GeoDataFrame.from_file(path_to_user_polygon)
 
@@ -75,11 +85,12 @@ def get_available_datasets_from_tiles(products=["S30"],
                                       years=[2018],
                                       user_shape="ignored/user_shape/dummy_region_europe.shp",
                                       return_list = False):
+
     # retrieve required tiles from the function above
     tiles = get_required_tiles_from_utm(user_shape=user_shape)
     datasets = nasa_hls.get_available_datasets(products=products, years=years, tiles=tiles, return_list=False)
 
     return datasets
 
-if __name__ == "__main__":
-    get_available_datasets_from_tiles()
+# if __name__ == "__main__":
+#     get_available_datasets_from_tiles()
