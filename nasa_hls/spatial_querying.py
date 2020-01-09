@@ -1,10 +1,9 @@
 import urllib
 import os
 from pathlib import Path
-
 import geopandas as gp
+import nasa_hls
 
-from nasa_hls.download_hls_dataset import download_batch
 
 
 def download_kml(dst):
@@ -32,8 +31,8 @@ def download_kml(dst):
     return path_utm
 
 
-def get_required_tiles_from_utm(path_to_utm_file = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.auxdata' + '/utm.kml'),
-                                user_shape = os.path.join(os.path.expanduser('~'), 'Dokumente', 'nasa_hls', 'data' + '/dummy_region.shp')):
+def get_required_tiles_from_utm(path_to_utm_file = "/home/robin/.nasa_hls/.auxdata/utm.kml",
+                                user_shape = "/home/robin/python_projects/data/nasa_hls/test_shape/dummy_region.shp"):
 
     """
     :param path_to_utm_file: requires the path where the Nasa's world-covering UTM.kml file is stored.
@@ -70,7 +69,7 @@ def get_required_tiles_from_utm(path_to_utm_file = os.path.join(os.path.expandus
 
 def get_available_datasets_from_tiles(products=["S30"],
                                       years=[2018],
-                                      user_shape=os.path.join(os.path.expanduser('~'), 'Dokumente', 'nasa_hls', 'data' + '/dummy_region.shp'),
+                                      user_shape= "/home/robin/python_projects/data/nasa_hls/test_shape/dummy_region.shp",
                                       return_list = False):
 
     # retrieve required tiles from the function above
@@ -83,9 +82,8 @@ def get_available_datasets_from_tiles(products=["S30"],
 
     return datasets
 
-def order_dataframe_by_date(date = "2018-01-01",
-                            datasets = datasets):
-    # indexing
-    return dataset # which can be put to download_batch
+def order_dataframe_by_date(date = "2018-01-01",):
+    dataset = dataset
+
 
 
