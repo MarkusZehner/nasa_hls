@@ -1,3 +1,4 @@
+rasterio
 bs4
 pandas
 requests

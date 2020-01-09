@@ -3,10 +3,22 @@ import os
 from spatialist import Vector
 
 
-#auxpath
-path = os.path.join(os.path.expanduser('~'), '.nasa_hls')
+# make user directory
+# download kml file in this directory
+path = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.auxdata2') + '/'
+os.mkdir(path + '/')
 
-path = '/media/aleko-kon/Daten/Geodaten/Master/GEO419'
+# here the user shapes should be placed
+path_data = '/home/aleko-kon/.nasa_hls/data/'
+os.mkdir(path_data)
+
+path = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.auxdata')
+
+
+
+
+
+
 
 vrt = os.path.join(path, 'auxdata', 'test.vrt')
 

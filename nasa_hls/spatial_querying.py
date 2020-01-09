@@ -1,5 +1,5 @@
 import urllib
-from os import path
+import os
 from pathlib import Path
 
 import geopandas as gp
@@ -13,37 +13,22 @@ def download_kml():
 
     :param dst: desired destination
 
-
     :return: destination of the .kml-file
     """
 
-    # erstelle pfad
-    # existiert order
-    # existiert datei
-    # wenn nicht: download
+    path = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.auxdata') + '/'
 
-    print("'y'  to download the ~ 100MB Files")
-    print("'q'  to not download and quit this stage")
-    print("")
+    if not os.path.exists(path):
+        os.mkdir(path)
+        print("new directory made")
 
-    choice = input("What would you like to do?")
+    path_utm = path + "utm.kml"
 
-    while choice != "q":
-
-        if choice == "y":
-            if path.exists(dst) == False:
-                src = (
-                    "https://hls.gsfc.nasa.gov/wp-content/uploads/2016/03/S2A_OPER_GIP_TILPAR_MPC__20151209T095117_V20150622T000000_21000101T000000_B00.kml")
-                urllib.request.urlretrieve(src, dst)
-                return dst
-            else:
-                print("sorry, this path already exists")
-                return dst
-
-        elif choice == "q":
-            break
-        else:
-            choice = input("Sorry I did't quite get it")
+    if not os.path.exists(path_utm):
+        src = (
+            "https://hls.gsfc.nasa.gov/wp-content/uploads/2016/03/S2A_OPER_GIP_TILPAR_MPC__20151209T095117_V20150622T000000_21000101T000000_B00.kml")
+        urllib.request.urlretrieve(src, path_utm)
+        return path_utm
 
 
 def get_required_tiles_from_utm(path_to_utm_file="ignored/UTM_tiles.kml",
