@@ -7,7 +7,7 @@ import geopandas as gp
 import nasa_hls
 
 
-def download_kml():
+def download_kml(dst):
     """
     Download the necessary .kml-file
 
@@ -31,8 +31,8 @@ def download_kml():
         return path_utm
 
 
-def get_required_tiles_from_utm(path_to_utm_file="ignored/UTM_tiles.kml",
-                                user_shape="ignored/user_shape/dummy_region.shp"):
+def get_required_tiles_from_utm(path_to_utm_file="/home/robin/.nasa_hls/.auxdata/utm.kml",
+                                user_shape = "/home/robin/python_projects/data/nasa_hls/test_shape/dummy_region.shp"):
     """
     :param path_to_utm_file: requires the path where the Nasa's world-covering UTM.kml file is stored.
     Do this manually by calling function 'download_utm_tiles'.
@@ -68,12 +68,16 @@ def get_required_tiles_from_utm(path_to_utm_file="ignored/UTM_tiles.kml",
 
 def get_available_datasets_from_tiles(products=["S30"],
                                       years=[2018],
-                                      user_shape="ignored/user_shape/dummy_region_europe.shp",
+                                      user_shape="/home/robin/python_projects/data/nasa_hls/test_shape/dummy_region.shp",
                                       return_list = False):
 
     # retrieve required tiles from the function above
     tiles = get_required_tiles_from_utm(user_shape=user_shape)
     datasets = nasa_hls.get_available_datasets(products=products, years=years, tiles=tiles, return_list=False)
+
+    # print entire row, set:
+    # import pandas as pd
+    # pd.set_option('display.max_colwidth', -1)
 
     return datasets
 
