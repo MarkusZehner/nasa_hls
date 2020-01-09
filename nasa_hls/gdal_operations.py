@@ -14,11 +14,12 @@ os.mkdir(path_data)
 
 path = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.auxdata')
 
-
-
-
-
-
+# get directory of hdfs
+# load hdfs in vrt
+# load shape in vrt
+# make mosaic of hdfs
+# crop mosaic with shape
+# export to directory of hdfs
 
 vrt = os.path.join(path, 'auxdata', 'test.vrt')
 
