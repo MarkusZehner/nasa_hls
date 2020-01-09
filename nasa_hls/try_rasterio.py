@@ -1,6 +1,11 @@
 import rasterio
 import os
 
+
+
+
+
+
 shp_path = '/media/aleko-kon/Daten/Geodaten/Master/GEO419/auxdata/user_shape/dummy_region.shp/'
 raster_path = '/media/aleko-kon/Daten/Geodaten/Master/GEO419/auxdata/' \
               'S2A_MSIL2A_20190820T074611_N0213_R135_T35JNH_20190820T120700.SAFE/' \
