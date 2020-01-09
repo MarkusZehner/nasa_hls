@@ -83,14 +83,9 @@ def get_available_datasets_from_tiles(products=["S30"],
 
     return datasets
 
-<<<<<<< HEAD
-=======
 def order_dataframe_by_date(date = "2018-01-01",
                             datasets = datasets):
     # indexing
     return dataset # which can be put to download_batch
->>>>>>> 225d565d76f490449d955790d2482fbb2369dc09
 
 
-# if __name__ == "__main__":
-#     get_available_datasets_from_tiles()
