@@ -75,6 +75,10 @@ def get_available_datasets_from_tiles(products=["S30"],
     tiles = get_required_tiles_from_utm(user_shape=user_shape)
     datasets = nasa_hls.get_available_datasets(products=products, years=years, tiles=tiles, return_list=False)
 
+    # print entire row, set:
+    # import pandas as pd
+    # pd.set_option('display.max_colwidth', -1)
+
     return datasets
 
 # if __name__ == "__main__":
