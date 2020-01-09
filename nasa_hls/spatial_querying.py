@@ -4,7 +4,7 @@ from pathlib import Path
 
 import geopandas as gp
 
-import nasa_hls
+from nasa_hls.download_hls_dataset import download_batch
 
 
 def download_kml():
@@ -17,22 +17,22 @@ def download_kml():
     """
 
     path = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.auxdata') + '/'
+    path_utm = path + "utm.kml"
 
     if not os.path.exists(path):
         os.mkdir(path)
         print("new directory made")
 
-    path_utm = path + "utm.kml"
 
     if not os.path.exists(path_utm):
         src = (
             "https://hls.gsfc.nasa.gov/wp-content/uploads/2016/03/S2A_OPER_GIP_TILPAR_MPC__20151209T095117_V20150622T000000_21000101T000000_B00.kml")
         urllib.request.urlretrieve(src, path_utm)
-        return path_utm
 
+    return path_utm
 
-def get_required_tiles_from_utm(path_to_utm_file="ignored/UTM_tiles.kml",
-                                user_shape="ignored/user_shape/dummy_region.shp"):
+def get_required_tiles_from_utm(path_to_utm_file = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.auxdata' + '/utm.kml'),
+                                user_shape = os.path.join(os.path.expanduser('~'), 'Dokumente', 'nasa_hls', 'data' + '/dummy_region.shp')):
     """
     :param path_to_utm_file: requires the path where the Nasa's world-covering UTM.kml file is stored.
     Do this manually by calling function 'download_utm_tiles'.
@@ -68,7 +68,7 @@ def get_required_tiles_from_utm(path_to_utm_file="ignored/UTM_tiles.kml",
 
 def get_available_datasets_from_tiles(products=["S30"],
                                       years=[2018],
-                                      user_shape="ignored/user_shape/dummy_region_europe.shp",
+                                      user_shape=os.path.join(os.path.expanduser('~'), 'Dokumente', 'nasa_hls', 'data' + '/dummy_region.shp'),
                                       return_list = False):
 
     # retrieve required tiles from the function above
@@ -76,6 +76,12 @@ def get_available_datasets_from_tiles(products=["S30"],
     datasets = nasa_hls.get_available_datasets(products=products, years=years, tiles=tiles, return_list=False)
 
     return datasets
+
+def order_dataframe_by_date(date = "2018-01-01",
+                            datasets = datasets):
+    # indexing
+    return dataset # which can be put to download_batch
+
 
 # if __name__ == "__main__":
 #     get_available_datasets_from_tiles()
