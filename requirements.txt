@@ -1,3 +1,4 @@
+geopandas
 rasterio
 bs4
 pandas
