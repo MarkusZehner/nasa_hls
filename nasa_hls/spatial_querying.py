@@ -82,10 +82,29 @@ def get_available_datasets_from_tiles(products=["S30"],
 
     return datasets
 
-def extract_date(date = "2018-01-01"):
+def extract_date(date = "2018-01-01", df = get_available_datasets_from_tiles()):
     """
-    date: date
+    date: date in the format "yyyy-mm-dd"
+    df: dataframe-object returned by the "get_available_datasets_from_tiles"-function
+    --------
+    returns:
+    dataframe with scenes from the scpecified date
     """
+
+    # set the date column to index
+    df = df.set_index("date")
+
+    # check if specified date is in date column
+    if date not in df.index:
+        print("\n \n For the tiles in your shapefile is no data at this date available")
+        return None
+    else:
+        df = df.loc[date]
+        print("\n \n There are {nrows} scenes available for the specified date and location".format(nrows = df.shape[0]))
+
+    return df
+
+
     
 
 
