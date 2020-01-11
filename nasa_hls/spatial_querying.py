@@ -82,7 +82,16 @@ def get_available_datasets_from_tiles(products=["S30"],
 
     return datasets
 
-def extract_date(date = "2018-01-01", df = get_available_datasets_from_tiles()):
+def show_available_dates(df):
+    print(type(df))
+    df_sorted = df.sort_values("date")
+    df_grouped = df_sorted.groupby(['date']).count()
+    df_selected = df_grouped.iloc[:,0:1]
+
+    return df_selected
+
+
+def extract_date(df, date = "2018-01-01"):
     """
     date: date in the format "yyyy-mm-dd"
     df: dataframe-object returned by the "get_available_datasets_from_tiles"-function
