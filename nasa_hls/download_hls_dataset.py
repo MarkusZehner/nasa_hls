@@ -14,7 +14,7 @@ def download_batch(dstdir, datasets, version="v1.4", overwrite=False):
     """
     for i, row in tqdm(datasets.iterrows(), total=datasets.shape[0]):
         download(dstdir, row["date"].strftime("%Y-%m-%d"), row["tile"], row["product"],
-                 version=version, overwrite= )
+                 version=version, overwrite=overwrite)
 
 
 def download(dstdir, date, tile, product, version="v1.4", overwrite=False):

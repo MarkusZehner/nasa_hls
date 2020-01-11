@@ -82,8 +82,11 @@ def get_available_datasets_from_tiles(products=["S30"],
 
     return datasets
 
-def order_dataframe_by_date(date = "2018-01-01",):
-    dataset = dataset
+def extract_date(date = "2018-01-01"):
+    """
+    date: date
+    """
+    
 
 
 
