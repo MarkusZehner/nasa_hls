@@ -4,68 +4,86 @@ from spatialist import Vector
 import rasterio
 import glob
 from osgeo import gdal
-
-# make user directory
-# download kml file in this directory
-path = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.auxdata')
-os.mkdir(path + '/')
-
-# here the user shapes should be placed
-path_data = '/home/aleko-kon/.nasa_hls/data/'
-os.mkdir(path_data)
+import os.path
+import sys
 
 
-path = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.auxdata')
+def main():
 
-# get directory of hdfs
-# load hdfs in vrt
-# load shape in vrt
-# make mosaic of hdfs
-# crop mosaic with shape
-# export to directory of hdfs
-
-vrt = os.path.join(path, 'auxdata', 'test.vrt')
-
-
-shp_path = '/home/robin/python_projects/data/nasa_hls/test_shape/dummy_region.shp'
-
-with Vector(shp_path) as site:
-    dem_autoload([site], 'SRTM 1Sec HGT', vrt=vrt)
-
-options = gdal.WarpOptions(format='GTiff')
-
-gdal.Warp(destNameOrDestDS='test.tif', srcDSOrSrcDSTab='test.vrt', options=options)
-
-
-### try it with rasterio
-
-hdf_path = "/home/robin/python_projects/data/nasa_hls/hdf_tiles"
-
-for i in glob(os.path.join(hdf_path, "/*.hdf"))
-    with rasterio.open(i) as src: 
-
-shadow = gdal.BuildVRT('/home/robin/python_projects/data/vrt', my_hdfs)
-
-
-### try it with python-gdal
-vrt_options = gdal.BuildVRTOptions(resampleAlg='cubic', addAlpha=True, bandList=[])
-my_hdfs = list(glob.glob(os.path.join("/home/robin/python_projects/data/nasa_hls/hdf_tiles",'*.hdf')))
-
-# make list with gdal datasets
-gdal_datasets = []
-for i in my_hdfs:
-    dataset = gdal.Open(i)
-    gdal_datasets.append(dataset)
-
-# loop over list and create vrts
-vrts = []
-for i in my_hdfs:
-    vrt = gdal.BuildVRT(os.path.join(i, ".vrt"), i, options=vrt_options)
-    vrts.append(vrt)
-
-# convert vrt to tiff
-gdal.Translate(".tif",vrts[1])
     
+    # make user directory
+    # download kml file in this directory
+    path = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.auxdata')
+    # check for kml download path
+    if not os.path.exists(path):
+        os.mkdir(path + '/')
+    else:
+        pass
+
+    # here the user shapes should be placed
+    path_data = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.data')
+    if not os.path.exists(path_data):
+        os.mkdir(path_data + "/")
+    else:
+        pass
+
+
+    # get directory of hdfs
+    # load hdfs in vrt
+    # load shape in vrt
+    # make mosaic of hdfs
+    # crop mosaic with shape
+    # export to directory of hdfs
+
+    # get the user directory for the hdf path
+    print("plese specidfy the directory for the hdfs")
+    hdf_dir = str(input())
+    
+
+    # make list with all the .hdf files in the directory
+    hdf_dir = "/home/robin/python_projects/data/nasa_hls/hdf_tiles/"
+    # "/home/robin/python_projects/data/nasa_hls/hdf_tiles"
+    hdf_path = list(glob.glob(os.path.join(hdf_dir, '*.hdf')))
+    print(hdf_path)
+
+    # make list with gdal datasets
+    gdal_datasets = []
+    for i in hdf_path:
+        dataset = gdal.Open(i)
+        gdal_datasets.append(dataset)
+
+    # build vrt with all from all the -hdf files specified
+    # print("making vrt")
+    # vrt_path = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.data', "hls.vrt")
+    # vrt = gdal.BuildVRT(vrt_path, gdal_datasets)
+
+    # shape path
+    # shp_path = '/home/robin/python_projects/data/nasa_hls/test_shape/dummy_region.shp'
+
+    ###############
+    ####### Mak VRT
+    ################
+
+    # set vrt-options. Don't know why, but on the command line requires different projections
+    vrtoptions = gdal.BuildVRTOptions(allowProjectionDifference=True, separate=True)
+    vrt_path = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.data', "final.vrt")
+
+    # make vrt 
+    final_vrt = gdal.BuildVRT(vrt_path, hdf_path, options=vrtoptions)
+    final_vrt = None
+
+
+    # convert vrt to tiff
+    final_tif = gdal.Translate(os.path.join(path_data + "/" + "final.tiff"), final_vrt)
+    print("final tif created \n\n")
+    print("Now proceed to clipping")
+    # use Johns spatialist to clip
+    # with Vector(shp_path) as site:
+    #     dem_autoload([site], 'SRTM 1Sec HGT', vrt=vrt)
+
+if __name__ == "__main__":
+    main()
+
 
 
 
