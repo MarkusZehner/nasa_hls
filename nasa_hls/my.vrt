@@ -1,0 +1,13 @@
+<VRTDataset rasterXSize="3660" rasterYSize="3660">
+  <SRS dataAxisToSRSAxisMapping="1,2">PROJCS["UTM_Zone_34S",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0],UNIT["Degree",0.0174532925199433]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",21],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],UNIT["Meter",1],AXIS["Easting",EAST],AXIS["Northing",NORTH]]</SRS>
+  <GeoTransform>  3.9996000000000000e+05,  3.0000000000000000e+01,  0.0000000000000000e+00, -3.1999800000000000e+06,  0.0000000000000000e+00, -3.0000000000000000e+01</GeoTransform>
+  <VRTRasterBand dataType="Int16" band="1">
+    <SimpleSource>
+      <SourceFilename relativeToVRT="0">/home/robin/python_projects/data/nasa_hls/hdf_tiles/HLS.L30.T34JDN.2018007.v1.4.hdf</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="3660" RasterYSize="3660" DataType="Int16" BlockXSize="3660" BlockYSize="1" />
+      <SrcRect xOff="0" yOff="0" xSize="3660" ySize="3660" />
+      <DstRect xOff="0" yOff="0" xSize="3660" ySize="3660" />
+    </SimpleSource>
+  </VRTRasterBand>
+</VRTDataset>
