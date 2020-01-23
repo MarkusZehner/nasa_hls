@@ -71,6 +71,31 @@ def get_required_tiles_from_utm(path_to_utm_file = "/home/robin/.nasa_hls/.auxda
     return tiles
 
 
+
+def get_tiles_dataset()
+    """
+    :param: shape, date, start_date, end_date
+    :return: dataset(s). contains date specific tiles in the spatial extent of the input shape.
+    can be ingested by download_batch. Returns list when time span is specified
+    """
+
+    return datasets
+
+def download_tiles():
+    """
+    :param: dstdir, shape, date, start_date, end_date
+    """
+
+
+    get_tiles()
+    dstdir = [mit der endung der tiles]
+
+    if länge df == 1 -> download_batch()
+    else:
+        for i in df:
+            download_batch(dstdir = dstdir)
+
+
 def get_available_datasets_from_tiles(products=["S30"],
                                       years=[2018],
                                       user_shape= "/home/robin/python_projects/data/nasa_hls/test_shape/dummy_region.shp",
