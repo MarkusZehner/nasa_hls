@@ -6,7 +6,10 @@ import glob
 from osgeo import gdal
 import os.path
 import sys
-import nasa_hls
+from nasa_hls.download_tiles import get_available_datasets_from_tiles
+from nasa_hls.download_hls_dataset import download_batch
+from nasa_hls.download_tiles import path_data_lin_robin
+from nasa_hls.download_tiles import path_data_lin_konsti
 
 
 ###################################################
@@ -14,7 +17,15 @@ import nasa_hls
 #################################################
 # def oder_date("*.hdf")
 
-from nasa_hls.download_tiles import download_kml
+
+def download_test(path_data = path_data_lin_konsti, user_shape = path_data_lin_konsti + "dummy_region.shp"):
+
+    dataset = get_available_datasets_from_tiles(user_shape=user_shape)
+    dataset_for_download = dataset.iloc[[0, 66, 202, 269], :]
+
+    print(type(dataset_for_download))
+    download_batch(path_data, dataset_for_download)
+    return print("finished")
 
 def main():
 

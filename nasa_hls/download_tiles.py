@@ -30,10 +30,11 @@ def download_kml():
     return path
 
 
-def get_required_tiles_from_utm(path_to_utm_file = "/home/robin/.nasa_hls/.auxdata/utm.kml",
-                                user_shape = "/home/robin/python_projects/data/nasa_hls/test_shape/dummy_region.shp"):
+def get_required_tiles_from_utm(path_to_utm_file = path_auxil + "utm.kml",
+                                user_shape = ""):
 
     """
+    :param user_shape:
     :param path_to_utm_file: requires the path where the Nasa's world-covering UTM.kml file is stored.
     Do this manually by calling function 'download_utm_tiles'.
 
@@ -64,48 +65,9 @@ def get_required_tiles_from_utm(path_to_utm_file = "/home/robin/.nasa_hls/.auxda
 
     return tiles
 
-
-
-def make_tiles_dataset()
-    """
-    :param: shape, date, start_date, end_date, product
-    :return: dataset(s). contains date specific tiles in the spatial extent of the input shape.
-    can be ingested by download_batch. Returns list when time span is specified
-
-    is
-    1. df -> when there is only a single date
-    2. list of df -> when time span is specified (iterable)
-    """
-
-    download_kml() -> pfad
-    get_required_tiles_from_utm() -> list(tiles_no)
-    get_available_datasets_from_tiles(products=, years=)
-    extract_date(date=, start_date=, end_date=)
-
-    return datasets # welches heruntergeladen werden soll -> download_tiles()
-#
-def download_tiles():
-    """
-    Download
-
-    :param: datasets, dstdir
-
-    :returns: none
-    """
-
-
-    get_tiles()
-    dstdir = [mit der endung der tiles]
-
-    if länge df == 1 -> download_batch()
-    else:
-        for i in df:
-            download_batch(dstdir = dstdir)
-
-
 def get_available_datasets_from_tiles(products=["S30"],
                                       years=[2018],
-                                      user_shape= "/home/robin/python_projects/data/nasa_hls/test_shape/dummy_region.shp",
+                                      user_shape= path_data_lin_konsti,
                                       return_list = False):
 
     # retrieve required tiles from the function above
@@ -113,6 +75,42 @@ def get_available_datasets_from_tiles(products=["S30"],
     datasets = nasa_hls.get_available_datasets(products=products, years=years, tiles=tiles, return_list=False)
 
     return datasets
+
+# def make_tiles_dataset(shape = )
+#     """
+#     :param: shape, date, start_date, end_date, product
+#     :return: dataset(s). contains date specific tiles in the spatial extent of the input shape.
+#     can be ingested by download_batch. Returns list when time span is specified
+#
+#     is
+#     1. df -> when there is only a single date
+#     2. list of df -> when time span is specified (iterable)
+#     """
+#
+#     download_kml() -> pfad
+#     get_required_tiles_from_utm() -> list(tiles_no)
+#     get_available_datasets_from_tiles(products=, years=)
+#     extract_date(date=, start_date=, end_date=)
+#
+#     return datasets # welches heruntergeladen werden soll -> download_tiles()
+# #
+# def download_tiles():
+#     """
+#     Download
+#
+#     :param: datasets, dstdir
+#
+#     :returns: none
+#     """
+#
+#
+#     get_tiles()
+#     dstdir = [mit der endung der tiles]
+#
+#     if länge df == 1 -> download_batch()
+#     else:
+#         for i in df:
+#             download_batch(dstdir = dstdir)
 
 def show_available_dates(df):
     print(type(df))
