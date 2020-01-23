@@ -28,7 +28,6 @@ def download_kml():
     return path
 ##
 
-
 def get_required_tiles_from_utm(path_to_utm_file = "/home/robin/.nasa_hls/.auxdata/utm.kml",
                                 user_shape = "/home/robin/python_projects/data/nasa_hls/test_shape/dummy_region.shp"):
 
