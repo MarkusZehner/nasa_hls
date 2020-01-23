@@ -3,13 +3,17 @@ import urllib
 from pathlib import Path
 import geopandas as gp
 import nasa_hls
+import pandas as pd
 
 path_data_win_konsti = os.path.join("D:", os.sep, "Geodaten", "#Jupiter", "GEO419", "data" + os.sep)
 path_data_lin_konsti = os.path.join(os.path.expanduser('~'), 'Dokumente', 'nasa_hls', 'data' + os.sep)
 
-path_data_lin_robin = os.path.join(os.path.expanduser('~'), 'python_projects', 'data', 'nasa_hls', 'hdf_tiles' + os.sep)
+# data (user_shape, final_tif...)
+dir_hdfs_lin_robin = os.path.join(os.path.expanduser('~'), 'python_projects', 'data', 'nasa_hls', 'hdf_tiles' + os.sep)
+path_shape_robin = os.path.join(os.path.expanduser('~'), 'python_projects', 'data', 'nasa_hls', 'test_shape', "dummy_region.shp")
 
 path_auxil = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.auxdata' + os.sep)
+
 
 def download_kml():
     """
@@ -31,9 +35,8 @@ def download_kml():
     return path
 
 
-def get_required_tiles_from_utm(path_to_utm_file = path_auxil + "utm.kml",
-                                user_shape = ""):
-
+def get_required_tiles_from_utm(path_to_utm_file=path_auxil + "utm.kml",
+                                user_shape=""):
     """
     :param user_shape:
     :param path_to_utm_file: requires the path where the Nasa's world-covering UTM.kml file is stored.
@@ -66,16 +69,17 @@ def get_required_tiles_from_utm(path_to_utm_file = path_auxil + "utm.kml",
 
     return tiles
 
+
 def get_available_datasets_from_tiles(products=["S30"],
                                       years=[2018],
-                                      user_shape= path_data_lin_konsti,
-                                      return_list = False):
-
+                                      user_shape=path_shape_robin,
+                                      return_list=False):
     # retrieve required tiles from the function above
     tiles = get_required_tiles_from_utm(user_shape=user_shape)
     datasets = nasa_hls.get_available_datasets(products=products, years=years, tiles=tiles, return_list=False)
 
     return datasets
+
 
 # def make_tiles_dataset(shape = )
 #     """
@@ -117,12 +121,12 @@ def show_available_dates(df):
     print(type(df))
     df_sorted = df.sort_values("date")
     df_grouped = df_sorted.groupby(['date']).count()
-    df_selected = df_grouped.iloc[:,0:1]
+    df_selected = df_grouped.iloc[:, 0:1]
 
     return df_selected
 
 
-def extract_date(df, date = "2018-01-01"):
+def extract_date(df, date="2018-01-01"):
     """
     date: date in the format "yyyy-mm-dd"
     df: dataframe-object returned by the "get_available_datasets_from_tiles"-function
@@ -132,20 +136,29 @@ def extract_date(df, date = "2018-01-01"):
     """
 
     # set the date column to index
-    df = df.set_index("date")
-    # check if specified date is in date column
-    if date not in df.index:
-        print("\n \n For the tiles in your shapefile is no data at this date available")
-        return None
+    df.date == pd.Timestamp(date)
+
+    # create logival vector for indexing later
+    sel = df.date == pd.Timestamp(date)
+
+    if sel.any() == False:
+        print("not data avaible at that date")
     else:
-        df = df.loc[date]
-        print("\n \n There are {nrows} scenes available for the specified date and location".format(nrows = df.shape[0]))
+        df = df[sel]
+
+    # check if specified date is in date column
+    # if date not in df["date"]:
+    #    print("\n \n For the tiles in your shapefile is no data at this date available")
+    #    return None
+    # else:
+    #    df = df.loc[df["date"] == date]
+    #    print("\n \n There are {nrows} scenes available for the specified date and location".format(nrows=df.shape[0]))
 
     return df
 
 
 
-    
+
 
 
 
