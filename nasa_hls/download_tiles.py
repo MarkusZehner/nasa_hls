@@ -1,19 +1,14 @@
-import urllib
 import os
+import urllib
 from pathlib import Path
 import geopandas as gp
-import nasa_hls
 
-path_data_win = os.path.join("D:", os.sep, "Geodaten", "#Jupiter", "GEO419", "data" + os.sep)
-path_data_lin = os.path.join(os.path.expanduser('~'), 'Dokumente', 'nasa_hls', 'data' + os.sep)
+path_data_win_konsti = os.path.join("D:", os.sep, "Geodaten", "#Jupiter", "GEO419", "data" + os.sep)
+path_data_lin_konsti = os.path.join(os.path.expanduser('~'), 'Dokumente', 'nasa_hls', 'data' + os.sep)
 
-
-path_data_lin = os.path.join(os.path.expanduser('~'), 'Dokumente', 'nasa_hls', 'data' + os.sep)
+path_data_lin_robin = os.path.join(os.path.expanduser('~'), 'python_projects', 'data', 'nasa_hls', 'hdf_tiles' + os.sep)
 
 path_auxil = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.auxdata' + os.sep)
-
-#
-
 
 def download_kml():
     """
@@ -33,7 +28,7 @@ def download_kml():
     else:
         print(f"File already downloaded to", path)
     return path
-##
+
 
 def get_required_tiles_from_utm(path_to_utm_file = "/home/robin/.nasa_hls/.auxdata/utm.kml",
                                 user_shape = "/home/robin/python_projects/data/nasa_hls/test_shape/dummy_region.shp"):
@@ -57,7 +52,6 @@ def get_required_tiles_from_utm(path_to_utm_file = "/home/robin/.nasa_hls/.auxda
     # if not proj is crs WGS84:
     # ändere
 
-
     # convert user_polygon into Gdf
     user_polygon = gp.GeoDataFrame.from_file(path_to_user_polygon)
 
@@ -72,18 +66,31 @@ def get_required_tiles_from_utm(path_to_utm_file = "/home/robin/.nasa_hls/.auxda
 
 
 
-def get_tiles_dataset()
+def make_tiles_dataset()
     """
-    :param: shape, date, start_date, end_date
+    :param: shape, date, start_date, end_date, product
     :return: dataset(s). contains date specific tiles in the spatial extent of the input shape.
     can be ingested by download_batch. Returns list when time span is specified
+
+    is
+    1. df -> when there is only a single date
+    2. list of df -> when time span is specified (iterable)
     """
 
-    return datasets
+    download_kml() -> pfad
+    get_required_tiles_from_utm() -> list(tiles_no)
+    get_available_datasets_from_tiles(products=, years=)
+    extract_date(date=, start_date=, end_date=)
 
+    return datasets # welches heruntergeladen werden soll -> download_tiles()
+#
 def download_tiles():
     """
-    :param: dstdir, shape, date, start_date, end_date
+    Download
+
+    :param: datasets, dstdir
+
+    :returns: none
     """
 
 
