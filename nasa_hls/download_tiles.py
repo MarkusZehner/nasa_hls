@@ -105,10 +105,6 @@ def get_available_datasets_from_tiles(products=["S30"],
     tiles = get_required_tiles_from_utm(user_shape=user_shape)
     datasets = nasa_hls.get_available_datasets(products=products, years=years, tiles=tiles, return_list=False)
 
-    # print entire row, set:
-    # import pandas as pd
-    # pd.set_option('display.max_colwidth', -1)
-
     return datasets
 
 def show_available_dates(df):
@@ -141,6 +137,7 @@ def extract_date(df, date = "2018-01-01"):
         print("\n \n There are {nrows} scenes available for the specified date and location".format(nrows = df.shape[0]))
 
     return df
+
 
 
     

@@ -6,6 +6,13 @@ import glob
 from osgeo import gdal
 import os.path
 import sys
+import nasa_hls
+
+
+###################################################
+###### Classify hls-files acoording to their date
+#################################################
+# def oder_date("*.hdf")
 
 
 def main():
