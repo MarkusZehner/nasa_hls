@@ -6,8 +6,10 @@ import glob
 from osgeo import gdal
 import os.path
 import sys
-import nasa_hls
+from nasa_hls.download_tiles import get_available_datasets_from_tiles
+from nasa_hls.download_hls_dataset import download_batch
 from nasa_hls.download_tiles import path_data_lin_robin
+from nasa_hls.download_tiles import path_data_lin_konsti
 
 
 ###################################################
@@ -15,7 +17,15 @@ from nasa_hls.download_tiles import path_data_lin_robin
 #################################################
 # def oder_date("*.hdf")
 
-from nasa_hls.download_tiles import download_kml
+
+def download_test(path_data = path_data_lin_konsti, user_shape = path_data_lin_konsti + "dummy_region.shp"):
+
+    dataset = get_available_datasets_from_tiles(user_shape=user_shape)
+    dataset_for_download = dataset.iloc[[0, 66, 202, 269], :]
+
+    print(type(dataset_for_download))
+    download_batch(path_data, dataset_for_download)
+    return print("finished")
 
 def main():
 
@@ -84,7 +94,7 @@ def main():
 
     # set vrt-options. Don't know why, but on the command line requires different projections
     vrtoptions = gdal.BuildVRTOptions(allowProjectionDifference=True, separate=True)
-    vrt_path = os.path.join(path_auxil, "final_py.vrt")
+    vrt_path = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.data', "final_py.vrt")
     print("the path where your vrt and final tiff will be is: \n {path}".format(path = vrt_path))
 
     # make vrt 
@@ -98,7 +108,7 @@ def main():
     final_vrt = None
 
     # convert vrt to tiff
-    final_tif = gdal.Translate(os.path.join(path_auxil, "final2.tiff"), vrt_path, projWinSRS=projection)
+    final_tif = gdal.Translate(os.path.join(path_data + "/" + "final2.tiff"), vrt_path, projWinSRS=projection)
     print("\nfinal tif created \n")
     print("Now proceed to clipping \n")
 
