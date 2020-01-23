@@ -7,7 +7,9 @@ import nasa_hls
 
 path_auxil = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.auxdata' + os.sep)
 
-##
+#
+
+
 def download_kml():
     """
     Download the necessary .kml-file
