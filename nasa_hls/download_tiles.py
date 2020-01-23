@@ -2,6 +2,7 @@ import os
 import urllib
 from pathlib import Path
 import geopandas as gp
+from nasa_hls.utils import get_available_datasets
 
 path_data_win_konsti = os.path.join("D:", os.sep, "Geodaten", "#Jupiter", "GEO419", "data" + os.sep)
 path_data_lin_konsti = os.path.join(os.path.expanduser('~'), 'Dokumente', 'nasa_hls', 'data' + os.sep)
@@ -20,80 +21,81 @@ def download_kml():
     path = path_auxil + "utm.kml"
 
     if not os.path.exists(path):
-        print(f"Creating new file in", path)
+        print(f"Creating new world UTM gird file in", path)
         src = (
             "https://hls.gsfc.nasa.gov/wp-content/uploads/2016/03/S2A_OPER_GIP_TILPAR_MPC__"
             "20151209T095117_V20150622T000000_21000101T000000_B00.kml")
         urllib.request.urlretrieve(src, path)
     else:
-        print(f"File already downloaded to", path)
+        print(f"UTM tiles already successfully downloaded to:\n", path, "\n")
     return path
 
-
-def get_required_tiles_from_utm(path_to_utm_file = path_auxil + "utm.kml",
-                                user_shape = ""):
-
+def get_available_datasets_from_tiles(products=None,
+                                      years=None,
+                                      user_shape=None,
+                                      utm_tiles=None):
     """
-    :param user_shape:
-    :param path_to_utm_file: requires the path where the Nasa's world-covering UTM.kml file is stored.
-    Do this manually by calling function 'download_utm_tiles'.
+    Calls the Nasa's world-covering UTM.kml file being stored. Do this manually by calling function 'download_kml'.
+
+    :param user_shape -> shape of the region of interest (ROI)
+    :param years -> required years to be checked for
+    :param products -> either L30 or S30, the Landsat 8 or Sentinel 2 product, respectively
+    :param utm_tiles -> if required: add a custom utm grid (must be in .kml format and must comply with nasa's file
 
     :return: list of tile name [str of 5 digits starting with two numbers] which geographically intersect the user
     shape and the UTM tiles.
     """
 
-    path_to_utm_file = Path(path_to_utm_file)
-    Path.exists(path_to_utm_file)
-    path_to_user_polygon = Path(user_shape)
-
-    # Enable fiona driver, then read kml-file
-    gp.io.file.fiona.drvsupport.supported_drivers['KML'] = 'rw'
-    UTM_tiles = gp.read_file(path_to_utm_file, driver='KML')
-
-    # if not proj is crs WGS84:
-    # ändere
+    # define defaults
+    if user_shape is None:
+        user_shape = path_data_lin_konsti + "dummy_region.shp"
+    if products is None:
+        products = ["S30"]
+    if years is None:
+        years = [2018]
+    if utm_tiles is None:
+        gp.io.file.fiona.drvsupport.supported_drivers['KML'] = 'rw' # Enable fiona driver, read in utm grid from kml
+        utm_tiles = gp.read_file(download_kml(), driver='KML')
 
     # convert user_polygon into Gdf
-    user_polygon = gp.GeoDataFrame.from_file(path_to_user_polygon)
+    user_polygon = gp.GeoDataFrame.from_file(user_shape)
 
     # perform intersection
-    intersections = gp.sjoin(user_polygon, UTM_tiles, how="inner", op='intersects')
+    match = gp.sjoin(user_polygon, utm_tiles, how="inner", op='intersects')
 
-    # write UTM-codes in lis
-    tiles = intersections["Name"].tolist()
-    print(tiles)
+    # write UTM-codes in list
+    tiles = match["Name"].tolist()
 
-    return tiles
-
-def get_available_datasets_from_tiles(products=["S30"],
-                                      years=[2018],
-                                      user_shape= path_data_lin_konsti,
-                                      return_list = False):
-
-    # retrieve required tiles from the function above
-    tiles = get_required_tiles_from_utm(user_shape=user_shape)
-    datasets = nasa_hls.get_available_datasets(products=products, years=years, tiles=tiles, return_list=False)
+    datasets = get_available_datasets(products=products, years=years, tiles=tiles, return_list=False)
 
     return datasets
 
-# def make_tiles_dataset(shape = )
-#     """
-#     :param: shape, date, start_date, end_date, product
-#     :return: dataset(s). contains date specific tiles in the spatial extent of the input shape.
-#     can be ingested by download_batch. Returns list when time span is specified
-#
-#     is
-#     1. df -> when there is only a single date
-#     2. list of df -> when time span is specified (iterable)
-#     """
-#
-#     download_kml() -> pfad
-#     get_required_tiles_from_utm() -> list(tiles_no)
-#     get_available_datasets_from_tiles(products=, years=)
-#     extract_date(date=, start_date=, end_date=)
-#
-#     return datasets # welches heruntergeladen werden soll -> download_tiles()
-# #
+
+def make_tiles_dataset(shape=path_data_lin_konsti,
+                       date=2018,
+                       start_date = "",
+                       end_date = ""):
+
+    """
+    :param: shape, date, start_date, end_date, product
+    :return: dataset(s). contains date specific tiles in the spatial extent of the input shape.
+    can be ingested by download_batch. Returns list when time span is specified
+
+    is
+    1. df -> when there is only a single date
+    2. list of df -> when time span is specified (iterable)
+    """
+
+    df = get_available_datasets_from_tiles()
+
+
+    # download_kml() -> pfad
+    # get_required_tiles_from_utm() -> list(tiles_no)
+    # get_available_datasets_from_tiles(products=, years=)
+    # extract_date(date=, start_date=, end_date=)
+    #
+    # return datasets # welches heruntergeladen werden soll -> download_tiles()
+
 # def download_tiles():
 #     """
 #     Download
