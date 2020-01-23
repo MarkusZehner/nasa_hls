@@ -5,30 +5,28 @@ import geopandas as gp
 import nasa_hls
 
 
+path_auxil = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.auxdata' + os.sep)
 
-def download_kml(dst):
+##
+def download_kml():
     """
     Download the necessary .kml-file
-
     :param dst: desired destination
-
     :return: destination of the .kml-file
     """
 
-    path = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.auxdata') + '/'
-    path_utm = path + "utm.kml"
+    path = path_auxil + "utm.kml"
 
     if not os.path.exists(path):
-        os.mkdir(path)
-        print("new directory made")
-
-
-    if not os.path.exists(path_utm):
+        print(f"Creating new file in", path)
         src = (
-            "https://hls.gsfc.nasa.gov/wp-content/uploads/2016/03/S2A_OPER_GIP_TILPAR_MPC__20151209T095117_V20150622T000000_21000101T000000_B00.kml")
-        urllib.request.urlretrieve(src, path_utm)
-
-    return path_utm
+            "https://hls.gsfc.nasa.gov/wp-content/uploads/2016/03/S2A_OPER_GIP_TILPAR_MPC__"
+            "20151209T095117_V20150622T000000_21000101T000000_B00.kml")
+        urllib.request.urlretrieve(src, path)
+    else:
+        print(f"File already downloaded to", path)
+    return path
+##
 
 
 def get_required_tiles_from_utm(path_to_utm_file = "/home/robin/.nasa_hls/.auxdata/utm.kml",
