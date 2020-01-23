@@ -67,7 +67,7 @@ def main():
 
     # set vrt-options. Don't know why, but on the command line requires different projections
     vrtoptions = gdal.BuildVRTOptions(allowProjectionDifference=True, separate=True)
-    vrt_path = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.data', "final.vrt")
+    vrt_path = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.data', "final_py.vrt")
     print("the path where your vrt and final tiff will be is: \n {path}".format(path = vrt_path))
 
     # make vrt 
@@ -80,15 +80,19 @@ def main():
     final_vrt = gdal.Warp(vrt_path, final_vrt, dstSRS=projection)
     final_vrt = None
 
-
     # convert vrt to tiff
     final_tif = gdal.Translate(os.path.join(path_data + "/" + "final2.tiff"), vrt_path, projWinSRS=projection)
     print("\nfinal tif created \n")
     print("Now proceed to clipping \n")
 
     # use Johns spatialist to clip
+    # from pyroSAR.auxdata import dem_autoload
     # with Vector(shp_path) as site:
     #     dem_autoload([site], 'SRTM 1Sec HGT', vrt=vrt)
+    # result.tif
+    #with Vector(shp_path) as site:
+    #    with Raster('result.tif')[site] as ras:
+    #        mat = ras.array()
 
     return None
 
