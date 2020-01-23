@@ -80,3 +80,6 @@ csv
 #venv
 venv
 /ignored/*
+
+# develop
+dev_*
