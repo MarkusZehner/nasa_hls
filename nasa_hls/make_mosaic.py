@@ -30,6 +30,14 @@ def main():
         pass
 
 
+
+
+        for i in nrow(datasets):
+            dstdir = dstdir + i
+            download_batch(dstdir)
+
+
+
     # get directory of hdfs
     # load hdfs in vrt
     # load shape in vrt
