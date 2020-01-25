@@ -17,6 +17,7 @@ def download_kml():
     Download the necessary .kml-file
     :param dst: desired destination
     :return: destination of the .kml-file
+
     """
 
     path = path_auxil + "utm.kml"
@@ -40,15 +41,23 @@ def get_available_datasets_from_tiles(products=None,
 
     :param shape -> shape of the region of interest (ROI)
     :param years -> required years to be checked for
-    :param products -> either L30 or S30, the Landsat 8 or Sentinel 2 product, respectively
+    :param products -> either "L30" or "S30", the Landsat 8 or Sentinel 2 product, respectively
 
     :return: list of tile name [str of 5 digits starting with two numbers] which geographically intersect the user
     shape and the UTM tiles.
     """
 
+    try:
+        shape = geopandas.read_file(shape)
+    except CPLE_OpenFailedError:
+        print("thats not a the path to a vector geometry")
+    except DriverError:
+        print("thats not a valid vector geometry")
+
+
     # define defaults
-    if shape is None:
-        print("no shape given") # raise error here
+    #if shape is None:
+       # print("no shape given") # raise error here
     if products is None:
         products = ["S30"]
     if years is None:
@@ -84,6 +93,8 @@ def make_tiles_dataset(shape=None,
     1. df -> when there is only a single date
     2. list of df -> when time span is specified (iterable)
     """
+
+
     if shape is None:
         print("please specify a shape..!") # raise an error here!
 
