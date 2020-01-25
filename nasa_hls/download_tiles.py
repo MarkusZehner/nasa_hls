@@ -134,7 +134,8 @@ def make_tiles_dataset(shape=None,
             if not start_date:
                 df = get_available_datasets_from_tiles(products=products, shape=shape, years=yyyy)
                 # datasets = extract_date(df, datum = date)
-                datasets = show_available_dates(df)
+                # datasets = show_available_dates(df)
+                datasets = dates_to_dict(df)
 
             # TIME SPAN INPUT
             # yet to be developed!
@@ -175,11 +176,31 @@ def show_available_dates(df):
 
     return df_selected
 
+
+def dates_to_dict(df):
+
+    # sort dataframe by date
+    df_sorted = df.sort_values(by = ["date"])
+
+    # make numpy array of unique dates
+    unique_dates = df_sorted.date.unique()
+
+    # create dictionary with keys being the unique dates
+    dataframe_dict = {date : pd.DataFrame for date in unique_dates}
+
+    # add rows of orignial dataframe as values
+    for key in dataframe_dict.keys():
+        dataframe_dict[key] = df[:][df.date == key]
+
+    return dataframe_dict
+
+
+
 ######################################################
-# specify date and date range in a thirs function here
+# specify date and date range in a this function here
 ######################################################
 
-def extract_date(df, datum="2018-01-01"):
+def extract_date(df, datum="2018-01-01", start_date = None, end_date = None):
     """
     expected Params
     :param date: date in the format "yyyy-mm-dd"
