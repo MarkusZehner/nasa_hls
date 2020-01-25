@@ -3,6 +3,8 @@ import urllib
 from pathlib import Path
 import geopandas as gp
 from nasa_hls.utils import get_available_datasets
+import pandas as pd
+
 
 path_data_win_konsti = os.path.join("D:", os.sep, "Geodaten", "#Jupiter", "GEO419", "data" + os.sep)
 path_data_lin_konsti = os.path.join(os.path.expanduser('~'), 'Dokumente', 'nasa_hls', 'data' + os.sep)
@@ -47,19 +49,21 @@ def get_available_datasets_from_tiles(products=None,
     shape and the UTM tiles.
     """
 
-    try:
-        shape = geopandas.read_file(shape)
-    except CPLE_OpenFailedError:
-        print("thats not a the path to a vector geometry")
-    except DriverError:
-        print("thats not a valid vector geometry")
+    # not needed here as we give it a valid shape from the "make_tiles_dataset"-function
+    # try:
+    #     shape = gp.read_file(shape)
+    #     print("shape read")
+    # except CPLE_OpenFailedError:
+    #     print("thats not a the path to a vector geometry")
+    # except DriverError:
+    #     print("thats not a valid vector geometry")
 
 
     # define defaults
     #if shape is None:
-       # print("no shape given") # raise error here
-    if products is None:
-        products = ["S30"]
+    #    # print("no shape given") # raise error here
+    # if products is None:
+    #     products = ["S30"]
     if years is None:
         years = [2018]
 
@@ -67,8 +71,8 @@ def get_available_datasets_from_tiles(products=None,
     utm_tiles = gp.read_file(download_kml(), driver='KML')
 
     # convert user_polygon into Gdf -> perform intersection
-    user_polygon = gp.GeoDataFrame.from_file(shape)
-    match = gp.sjoin(user_polygon, utm_tiles, how="inner", op='intersects')
+    # user_polygon = gp.GeoDataFrame.from_file(shape)
+    match = gp.sjoin(shape, utm_tiles, how="inner", op='intersects')
 
     # write UTM-codes in list
     tiles = match["Name"].tolist()
@@ -94,33 +98,56 @@ def make_tiles_dataset(shape=None,
     2. list of df -> when time span is specified (iterable)
     """
 
+   # das muss in eine if-else schleife
+   # if try works --> continue
+   # if except --> break, da eh kein shapefile
+    while True:
+        try:
+            shape = gp.read_file(shape)
+            print("valid shape, process continues")
 
-    if shape is None:
-        print("please specify a shape..!") # raise an error here!
 
-    if products is None:
-        products = ["S30"]
+            # except CPLE_OpenFailedError:
+            #     print("thats not a the path to a vector geometry")
+            # except DriverError:
+            #     print("thats not a valid vector geometry")
 
-    if date:
-        print(f"single date information: ", date)
-    if start_date:
-        print(f"starting date: ", start_date)
-    if end_date:
-        print(f"end date: ", end_date)
 
-    datasets = None
-    yyyy = [date[0:4]]
-    print(f"year: ", yyyy)
+            # if shape is None:
+            #     print("please specify a shape..!") # raise an error here!
 
-    # SINGLE YEAR INPUT parse year from date input
-    if not start_date:
-        df = get_available_datasets_from_tiles(products=products, shape=shape, years=yyyy)
-        datasets = extract_date(df, date)
+            if products is None:
+                products = ["S30"]
 
-    # TIME SPAN INPUT
-    # yet to be developed!
+            if date:
+                print(f"single date information: ", date)
+            if start_date:
+                print(f"starting date: ", start_date)
+            if end_date:
+                print(f"end date: ", end_date)
+
+            datasets = None
+            yyyy = [date[0:4]]
+            print(f"year: ", yyyy)
+
+            # SINGLE YEAR INPUT parse year from date input
+            if not start_date:
+                df = get_available_datasets_from_tiles(products=products, shape=shape, years=yyyy)
+                # datasets = extract_date(df, datum = date)
+                datasets = show_available_dates(df)
+
+            # TIME SPAN INPUT
+            # yet to be developed!
+            break
+
+
+        except:
+            print("something is wrong with your shapefile. This will not work\n\n")
+            return None
 
     return datasets
+        
+
 
 # def download_tiles():
 #     """
@@ -141,32 +168,44 @@ def make_tiles_dataset(shape=None,
 #             download_batch(dstdir = dstdir)
 
 def show_available_dates(df):
-    print(type(df))
-    df_sorted = df.sort_values("date")
-    df_grouped = df_sorted.groupby(['date']).count()
-    df_selected = df_grouped.iloc[:, 0:1]
+    print("\n\n", type(df))
+    df_sorted = df.sort_values(by = ["date"])
+    df_grouped = df_sorted.groupby(['date'], as_index = False).count()
+    df_selected = df_grouped[["date", "product"]]
 
     return df_selected
 
+######################################################
+# specify date and date range in a thirs function here
+######################################################
 
-def extract_date(df, date="2018-01-01"):
+def extract_date(df, datum="2018-01-01"):
     """
-    date: date in the format "yyyy-mm-dd"
-    df: dataframe-object returned by the "get_available_datasets_from_tiles"-function
+    expected Params
+    :param date: date in the format "yyyy-mm-dd"
+    :param df: dataframe-object returned by the "get_available_datasets_from_tiles"-function
     --------
     returns:
     dataframe with scenes from the scpecified date
     """
 
-    # set the date column to index
-    df = df.set_index("date")
+    # set the date column to timestamp
+    df["date"] = pd.Timestamp()
+
+    # create logival vector for indexing later
+    sel = df.date == pd.Timestamp(datum)
+
+    if sel.any() == False:
+        print("not data avaible at that date")
+    else:
+        df = df[sel]
 
     # check if specified date is in date column
-    if date not in df.index:
-        print("\n \n For the tiles in your shapefile is no data at this date available")
-        return None
-    else:
-        df = df.loc[date]
-        print("\n \n There are {nrows} scenes available for the specified date and location".format(nrows=df.shape[0]))
+    # if date not in df["date"]:
+    #    print("\n \n For the tiles in your shapefile is no data at this date available")
+    #    return None
+    # else:
+    #    df = df.loc[df["date"] == date]
+    #    print("\n \n There are {nrows} scenes available for the specified date and location".format(nrows=df.shape[0]))
 
     return df
