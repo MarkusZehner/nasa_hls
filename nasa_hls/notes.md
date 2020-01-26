@@ -16,7 +16,7 @@ wie die beiden parameter in make_tiles_dataset übergeben werden!
 
 
 @ konsti(25.1): wollen wir die Funtion "get_availanle_datasets_from tiles" evtl "get_available_datasets_from_shape" nennen?
-
+Ja, gerne. Habe es umbenannt
 
 ## Get date-metadate from file
 

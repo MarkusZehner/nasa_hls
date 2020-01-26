@@ -5,7 +5,6 @@ import geopandas as gp
 from nasa_hls.utils import get_available_datasets
 import pandas as pd
 
-
 path_data_win_konsti = os.path.join("D:", os.sep, "Geodaten", "#Jupiter", "GEO419", "data" + os.sep)
 path_data_lin_konsti = os.path.join(os.path.expanduser('~'), 'Dokumente', 'nasa_hls', 'data' + os.sep)
 
@@ -35,7 +34,7 @@ def download_kml():
     return path
 
 
-def get_available_datasets_from_tiles(products=None,
+def get_available_datasets_from_shape(products=None,
                                       years=None,
                                       shape=None):
     """
@@ -58,12 +57,12 @@ def get_available_datasets_from_tiles(products=None,
     # except DriverError:
     #     print("thats not a valid vector geometry")
 
-
     # define defaults
-    #if shape is None:
+    # if shape is None:
     #    # print("no shape given") # raise error here
     # if products is None:
     #     products = ["S30"]
+
     if years is None:
         years = [2018]
 
@@ -98,20 +97,18 @@ def make_tiles_dataset(shape=None,
     2. list of df -> when time span is specified (iterable)
     """
 
-   # das muss in eine if-else schleife
-   # if try works --> continue
-   # if except --> break, da eh kein shapefile
+    # das muss in eine if-else schleife
+    # if try works --> continue
+    # if except --> break, da eh kein shapefile
     while True:
         try:
             shape = gp.read_file(shape)
             print("valid shape, process continues")
 
-
             # except CPLE_OpenFailedError:
             #     print("thats not a the path to a vector geometry")
             # except DriverError:
             #     print("thats not a valid vector geometry")
-
 
             # if shape is None:
             #     print("please specify a shape..!") # raise an error here!
@@ -137,8 +134,6 @@ def make_tiles_dataset(shape=None,
                 # datasets = show_available_dates(df)
                 datasets = dates_to_dict(df)
 
-            # TIME SPAN INPUT
-            # yet to be developed!
             break
 
 
@@ -147,46 +142,56 @@ def make_tiles_dataset(shape=None,
             return None
 
     return datasets
-        
 
 
-# def download_tiles():
-#     """
-#     Download
-#
-#     :param: datasets, dstdir
-#
-#     :returns: none
-#     """
-#
-#
-#     get_tiles()
-#     dstdir = [mit der endung der tiles]
-#
-#     if länge df == 1 -> download_batch()
-#     else:
-#         for i in df:
-#             download_batch(dstdir = dstdir)
+def download_tiles(datasets = None,
+                   dstdir = path_data_win_konsti + "hdf/",
+                   date="2018-01-08",
+                   start_date=None,
+                   end_date=None):
+    """
+    Download from download_batch.
+    Calls datasets from make_tiles_dataset and transfers it in a manner to be digested by
+    download_hls_dataset.download_batch.
+    A specific date, a date range with start and end date or a range number of file can be selected to be downloaded.
+
+    :param: datasets, dstdir
+
+    :returns: none
+    """
+
+    # TIME SPAN INPUT
+    # yet to be developed!
+    # if start_date:
+    #     print(f"starting date: ", start_date)
+    # if end_date:
+    #     print(f"end date: ", end_date)
+    # get_tiles()
+    # dstdir = [mit der endung der tiles]
+    #
+    # if länge df == 1 -> download_batch()
+    # else:
+    #     for i in df:
+    #         download_batch(dstdir = dstdir)
 
 def show_available_dates(df):
     print("\n\n", type(df))
-    df_sorted = df.sort_values(by = ["date"])
-    df_grouped = df_sorted.groupby(['date'], as_index = False).count()
+    df_sorted = df.sort_values(by=["date"])
+    df_grouped = df_sorted.groupby(['date'], as_index=False).count()
     df_selected = df_grouped[["date", "product"]]
 
     return df_selected
 
 
 def dates_to_dict(df):
-
     # sort dataframe by date
-    df_sorted = df.sort_values(by = ["date"])
+    df_sorted = df.sort_values(by=["date"])
 
     # make numpy array of unique dates
     unique_dates = df_sorted.date.unique()
 
     # create dictionary with keys being the unique dates
-    dataframe_dict = {date : pd.DataFrame for date in unique_dates}
+    dataframe_dict = {date: pd.DataFrame for date in unique_dates}
 
     # add rows of orignial dataframe as values
     for key in dataframe_dict.keys():
@@ -195,16 +200,15 @@ def dates_to_dict(df):
     return dataframe_dict
 
 
-
 ######################################################
 # specify date and date range in a this function here
 ######################################################
 
-def extract_date(df, datum="2018-01-01", start_date = None, end_date = None):
+def extract_date(df, datum="2018-01-01", start_date=None, end_date=None):
     """
     expected Params
     :param date: date in the format "yyyy-mm-dd"
-    :param df: dataframe-object returned by the "get_available_datasets_from_tiles"-function
+    :param df: dataframe-object returned by the "get_available_datasets_from_shape"-function
     --------
     returns:
     dataframe with scenes from the scpecified date
