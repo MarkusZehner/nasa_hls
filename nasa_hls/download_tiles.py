@@ -129,16 +129,12 @@ def make_tiles_dataset(shape=None,
 
             # SINGLE YEAR INPUT parse year from date input
             if not start_date:
-                df = get_available_datasets_from_tiles(products=products, shape=shape, years=yyyy)
+                df = get_available_datasets_from_shape(products=products, shape=shape, years=yyyy)
                 # datasets = extract_date(df, datum = date)
                 # datasets = show_available_dates(df)
                 datasets = dates_to_dict(df)
-<<<<<<< HEAD
             # TIME SPAN INPUT
             # yet to be developed!
-=======
-
->>>>>>> 15ea0de73641eb85f9daef0debe878ed461752d4
             break
 
 
