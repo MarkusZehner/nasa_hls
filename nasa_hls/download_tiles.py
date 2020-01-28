@@ -136,7 +136,6 @@ def make_tiles_dataset(shape=None,
                 # datasets = extract_date(df, datum = date)
                 # datasets = show_available_dates(df)
                 datasets = dates_to_dict(df)
-
             # TIME SPAN INPUT
             # yet to be developed!
             break
