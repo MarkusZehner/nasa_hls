@@ -1,6 +1,5 @@
 import os
 import urllib
-from pathlib import Path
 import geopandas as gp
 from nasa_hls.utils import get_available_datasets
 import pandas as pd
@@ -47,21 +46,6 @@ def get_available_datasets_from_shape(products=None,
     :return: list of tile name [str of 5 digits starting with two numbers] which geographically intersect the user
     shape and the UTM tiles.
     """
-
-    # not needed here as we give it a valid shape from the "make_tiles_dataset"-function
-    # try:
-    #     shape = gp.read_file(shape)
-    #     print("shape read")
-    # except CPLE_OpenFailedError:
-    #     print("thats not a the path to a vector geometry")
-    # except DriverError:
-    #     print("thats not a valid vector geometry")
-
-    # define defaults
-    # if shape is None:
-    #    # print("no shape given") # raise error here
-    # if products is None:
-    #     products = ["S30"]
 
     if years is None:
         years = [2018]
@@ -184,14 +168,6 @@ def download_tiles(datasets = None,
     #     for i in df:
     #         download_batch(dstdir = dstdir)
 
-def show_available_dates(df):
-    print("\n\n", type(df))
-    df_sorted = df.sort_values(by=["date"])
-    df_grouped = df_sorted.groupby(['date'], as_index=False).count()
-    df_selected = df_grouped[["date", "product"]]
-
-    return df_selected
-
 
 def dates_to_dict(df):
     # sort dataframe by date
@@ -211,8 +187,17 @@ def dates_to_dict(df):
 
 
 ######################################################
-# specify date and date range in a this function here
+# deprecated
 ######################################################
+
+def show_available_dates(df):
+    print("\n\n", type(df))
+    df_sorted = df.sort_values(by=["date"])
+    df_grouped = df_sorted.groupby(['date'], as_index=False).count()
+    df_selected = df_grouped[["date", "product"]]
+
+    return df_selected
+
 
 def extract_date(df, datum="2018-01-01", start_date=None, end_date=None):
     """
