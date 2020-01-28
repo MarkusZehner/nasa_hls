@@ -84,7 +84,8 @@ def get_available_datasets_from_shape(products=None,
 
 def make_tiles_dataset(shape=None,
                        products=None,
-                       date="2018-01-08",
+                       date=None, # TODO: read year as int
+                       year=None,
                        start_date=None,
                        end_date=None):
     """
@@ -97,25 +98,15 @@ def make_tiles_dataset(shape=None,
     2. list of df -> when time span is specified (iterable)
     """
 
-    # das muss in eine if-else schleife
-    # if try works --> continue
-    # if except --> break, da eh kein shapefile
+    # TODO: convert date to datetime Timestamp (numpy)
+
     while True:
         try:
             shape = gp.read_file(shape)
             print("valid shape, process continues")
 
-            # except CPLE_OpenFailedError:
-            #     print("thats not a the path to a vector geometry")
-            # except DriverError:
-            #     print("thats not a valid vector geometry")
-
-            # if shape is None:
-            #     print("please specify a shape..!") # raise an error here!
-
             if products is None:
                 products = ["S30"]
-
             if date:
                 print(f"single date information: ", date)
             if start_date:
@@ -123,27 +114,44 @@ def make_tiles_dataset(shape=None,
             if end_date:
                 print(f"end date: ", end_date)
 
-            datasets = None
+            # TODO: years = extract year from timedate object
+
             yyyy = [date[0:4]]
-            print(f"year: ", yyyy)
 
-            # SINGLE YEAR INPUT parse year from date input
-            if not start_date:
-                df = get_available_datasets_from_shape(products=products, shape=shape, years=yyyy)
-                # datasets = extract_date(df, datum = date)
-                # datasets = show_available_dates(df)
-                datasets = dates_to_dict(df)
-            # TIME SPAN INPUT
-            # yet to be developed!
+            df = get_available_datasets_from_shape(products=products, shape=shape, years=yyyy)
+            # SPLIT DATAFRAME AS USER DATE INPUT  . . .
+            dictionary = dates_to_dict(df)
+
+            # TODO. TRY-EXEPT (low prio)
+
+            # # Ein Tag
+            # if date is not None:
+            #     # TODO. nur ein Tag
+            #
+            # # Zeiraum
+            # elif start_date is not None or end_date is not None:
+            #     # TODO: only start_date -> get dict for rest of year
+            #     # TODO: only end_date -> get dict for beginning of year
+            #
+            #     # TODO: Start_date
+            #     if:
+            #         # T
+            #
+            #     # TODO: End_date
+            #     if:
+            #         #
+            #
+            # # year
+            # elif year is not None:
+            #     # get for whole year
+            #
             break
-
 
         except:
             print("something is wrong with your shapefile. This will not work\n\n")
             return None
 
-    return datasets
-
+    return dictionary
 
 def download_tiles(datasets = None,
                    dstdir = path_data_win_konsti + "hdf/",
@@ -155,8 +163,9 @@ def download_tiles(datasets = None,
     Calls datasets from make_tiles_dataset and transfers it in a manner to be digested by
     download_hls_dataset.download_batch.
     A specific date, a date range with start and end date or a range number of file can be selected to be downloaded.
+    Iteration over dict
 
-    :param: datasets, dstdir
+    :param: dictonary, dstdir
 
     :returns: none
     """
