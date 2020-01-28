@@ -2,6 +2,8 @@ import os
 import urllib
 import geopandas as gp
 from nasa_hls.utils import get_available_datasets
+from nasa_hls.download_hls_dataset import download
+from nasa_hls.download_hls_dataset import download_batch
 import pandas as pd
 import numpy as np
 import datetime
@@ -189,11 +191,7 @@ def make_tiles_dataset(shape=None,
 
     return dataframes
 
-def download_tiles(datasets = None,
-                   dstdir = path_data_win_konsti + "hdf/",
-                   date="2018-01-08",
-                   start_date=None,
-                   end_date=None):
+def download_tiles(dstdir = path_data_lin_robin + "hdf/", datasets = None):
     """
     Download from download_batch.
     Calls datasets from make_tiles_dataset and transfers it in a manner to be digested by
@@ -219,6 +217,9 @@ def download_tiles(datasets = None,
     # else:
     #     for i in df:
     #         download_batch(dstdir = dstdir)
+
+    for df in datasets:
+        download_batch(dstdir = dstdir, datasets = df)
 
 
 def dates_to_dict(df):
