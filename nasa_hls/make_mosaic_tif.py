@@ -12,6 +12,8 @@ from nasa_hls.download_hls_dataset import download_batch
 from nasa_hls.download_tiles import path_data_lin_robin
 from nasa_hls.download_tiles import path_data_lin_konsti
 
+gdal.UseExceptions()
+
 # make mosaic function
 def make_mosaic_tif(srcdir = path_data_lin_robin + "hdf/", dstdir = path_data_lin_robin + "mosaic/"):
 
@@ -24,7 +26,8 @@ def make_mosaic_tif(srcdir = path_data_lin_robin + "hdf/", dstdir = path_data_li
         l = line.split(".")[3][4:]
         dates_doy.append(l)
 
-    print(dates_doy)
+    # print list with unique
+    #print(dates_doy)
 
     # make a function that gets the unique entries from a list
     # these will be the keys afterwards
@@ -56,23 +59,35 @@ def make_mosaic_tif(srcdir = path_data_lin_robin + "hdf/", dstdir = path_data_li
         # die nach diesem Durchgang wieder neu aufgesetzt wird
         dataframe_dict[key] = foo
 
+
+    for key, item in dataframe_dict.items():
+         print(key, item, "\n")
+
     
 
     for key in dataframe_dict.keys():
+        print(key)
         hdf_list = dataframe_dict[key]
+        band = 'B02'
+        hdf_list = ['HDF4_EOS:EOS_GRID:"{0}":Grid:{1}'.format(x, band) for x in hdf_list]
+        print('\n'.join(hdf_list))
         vrt_path = os.path.join(path_data_lin_robin, "mosaic", "mosaic" + key + ".vrt")
         build_vrt = gdal.BuildVRT(vrt_path, hdf_list)
+        if build_vrt is None:
+            continue
+        build_vrt.FlushCache()
+        # build_vrt = None
+        final_tif = gdal.Translate(os.path.join(path_data_lin_robin + "mosaic/" + key + ".tiff"), build_vrt)
+        final_tif = None
         build_vrt = None
-        final_tif = gdal.Translate(os.path.join(path_data_lin_robin + "mosaic/" + key + ".tiff"), vrt_path)
 
 
+    # # vrt_path = os.path.join(path_data_lin_robin, "mosaic", "mosaic.vrt")
+    # # # make vrt 
+    # # final_vrt = gdal.BuildVRT(vrt_path, hdf_files_list)
+    # # final_vrt = None
 
-    # vrt_path = os.path.join(path_data_lin_robin, "mosaic", "mosaic.vrt")
-    # # make vrt 
-    # final_vrt = gdal.BuildVRT(vrt_path, hdf_files_list)
-    # final_vrt = None
+    # # # make tif
+    # # final_tif = gdal.Translate(os.path.join(path_data_lin_robin + "mosaic/" + "final.tiff"), vrt_path)
 
-    # # make tif
-    # final_tif = gdal.Translate(os.path.join(path_data_lin_robin + "mosaic/" + "final.tiff"), vrt_path)
-
-    return None
+    # return None

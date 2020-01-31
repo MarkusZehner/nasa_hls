@@ -5,3 +5,18 @@
 
 # if shape is None:
 #     print("please specify a shape..!") # raise an error here!
+
+
+
+# Johns Try, Except Example
+############################################
+
+    # import Error!!    
+    # try:
+    #     print('huhu')
+    # except RuntimeError as e:
+    #     print(e)
+    #     raise TypeError(str(e) + '\nhaha')
+    # except EvilError
+
+############################################

@@ -12,6 +12,7 @@ path_data_win_konsti = os.path.join("D:", os.sep, "Geodaten", "#Jupiter", "GEO41
 path_data_lin_konsti = os.path.join(os.path.expanduser('~'), 'Dokumente', 'nasa_hls', 'data' + os.sep)
 
 path_data_lin_robin = os.path.join(os.path.expanduser('~'), 'python_projects', 'data', 'nasa_hls', 'hdf_tiles' + os.sep)
+path_shape_robin = os.path.join("/home/robin/python_projects/data/nasa_hls/test_shape/dummy_region.shp")
 
 path_auxil = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.auxdata' + os.sep)
 
