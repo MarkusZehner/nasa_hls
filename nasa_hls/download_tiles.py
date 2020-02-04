@@ -13,6 +13,7 @@ path_shape_robin = os.path.join("/home/robin/python_projects/data/nasa_hls/test_
 
 path_auxil = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.auxdata' + os.sep)
 
+pd.set_option('display.max_columns', 500)
 
 def download_kml():
     """
@@ -52,6 +53,9 @@ def get_available_datasets_from_shape(products=None,
     if years is None:
         years = [2018]
 
+    shape = gp.read_file(shape)
+    # TODO: load shape here instead of in the make_tiles function
+
     gp.io.file.fiona.drvsupport.supported_drivers['KML'] = 'rw'  # Enable fiona driver, read in utm grid from kml
     utm_tiles = gp.read_file(download_kml(), driver='KML')
 
@@ -60,11 +64,11 @@ def get_available_datasets_from_shape(products=None,
     match = gp.sjoin(shape, utm_tiles, how="inner", op='intersects')
 
     # write UTM-codes in list
+
     tiles = match["Name"].tolist()
 
     print("\ngetting available datasets . . .")
     datasets = get_available_datasets(products=products, years=years, tiles=tiles, return_list=False)
-    
 
     return datasets
 
@@ -100,7 +104,8 @@ def make_tiles_dataset(shape=None,
     # while True:
     #     try:
 
-    shape = gp.read_file(shape)
+    # TODO: not loading shape here
+
     print("valid shape, process continues\n")
 
     if products is None:
