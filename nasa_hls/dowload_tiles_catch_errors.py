@@ -4,6 +4,8 @@ import geopandas as gp
 from nasa_hls.utils import get_available_datasets
 from nasa_hls.download_hls_dataset import download_batch
 import pandas as pd
+import fiona
+import rasterio._err
 
 path_data_win_konsti = os.path.join("D:", os.sep, "Geodaten", "#Jupiter", "GEO419", "data" + os.sep)
 path_data_lin_konsti = os.path.join(os.path.expanduser('~'), 'Dokumente', 'nasa_hls', 'data' + os.sep)
@@ -52,15 +54,8 @@ def get_available_datasets_from_shape(products=None,
     if years is None:
         years = [2018]
 
-    shape = gp.read_file(shape)
-    print("valid shape, process continues\n")
-
-    if "Name" in shape:
-        shape = shape.rename(columns={"Name":"name_shape"})
-
     gp.io.file.fiona.drvsupport.supported_drivers['KML'] = 'rw'  # Enable fiona driver, read in utm grid from kml
     utm_tiles = gp.read_file(download_kml(), driver='KML')
-    
 
     # convert user_polygon into Gdf -> perform intersection
     # user_polygon = gp.GeoDataFrame.from_file(shape)
@@ -92,6 +87,19 @@ def make_tiles_dataset(shape=None,
     2. list of df -> when time span is specified (iterable)
     """
 
+    if shape is None:
+        print("please specify a shape..!") # raise an error here!
+        ###how to get out of whole function??####
+
+    try:
+        shape = gp.read_file(shape)
+        print("valid shape, process continues\n")
+    except rasterio._err.CPLE_OpenFailedError:
+        print("thats not a the path to a vector geometry")
+    except  fiona. DriverError:
+       print("thats not a valid vector geometry")
+
+
     try:
      # convert given dates to pd.timestampe
         if date:
@@ -102,12 +110,15 @@ def make_tiles_dataset(shape=None,
             end_date = pd.Timestamp(end_date).date()
     except ValueError:
         print("provide a string in the format 'yyyy-mm-dd'") # if this error is raised, all the rest should not even be evaluated
+    except AttributeError:
+        print("Attribute Error")
 
     # still needs a little description about whats happening here
     # while True:
     #     try:
 
     
+
     if products is None:
         products = ["S30"]
     if date:
