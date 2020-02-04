@@ -53,7 +53,7 @@ def get_available_datasets_from_shape(products=None,
         years = [2018]
 
     shape = gp.read_file(shape)
-    print("valid shape, process continues\n")
+    #print("valid shape, process continues\n")
 
     if "Name" in shape:
         shape = shape.rename(columns={"Name":"name_shape"})
@@ -194,7 +194,7 @@ def make_tiles_dataset(shape=None,
 
     return dataframes
 
-def download_tiles(dstdir = path_data_lin_robin + "hdf/", datasets = None):
+def download_tiles(dstdir = None, datasets = None):
     """
     Download from download_batch.
     Calls datasets from make_tiles_dataset and transfers it in a manner to be digested by
@@ -206,20 +206,6 @@ def download_tiles(dstdir = path_data_lin_robin + "hdf/", datasets = None):
 
     :returns: none
     """
-
-    # TIME SPAN INPUT
-    # yet to be developed!
-    # if start_date:
-    #     print(f"starting date: ", start_date)
-    # if end_date:
-    #     print(f"end date: ", end_date)
-    # get_tiles()
-    # dstdir = [mit der endung der tiles]
-    #
-    # if länge df == 1 -> download_batch()
-    # else:
-    #     for i in df:
-    #         download_batch(dstdir = dstdir)
 
     for df in datasets:
         download_batch(dstdir = dstdir, datasets = df)
