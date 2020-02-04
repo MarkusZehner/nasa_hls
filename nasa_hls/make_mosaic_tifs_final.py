@@ -112,10 +112,10 @@ def make_mosaic_tif(srcdir = path_data_lin_robin + "hdf/", dstdir = path_data_li
 
     ######is
     #print the dict
-    ######
-    # for keys, items in dates_dict.items():
-    #     print(keys, items, "\n")
-    # print dictionary nicely
+    #####
+    #for keys, items in dates_dict.items():
+    #    print(keys, items, "\n")
+    #print dictionary nicely
     #print("\n".join("{}\t{}".format(k, v) for k, v in dates_dict.items()))
     #print(len(dates_dict))
 
