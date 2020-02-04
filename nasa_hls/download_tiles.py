@@ -2,11 +2,8 @@ import os
 import urllib
 import geopandas as gp
 from nasa_hls.utils import get_available_datasets
-from nasa_hls.download_hls_dataset import download
 from nasa_hls.download_hls_dataset import download_batch
 import pandas as pd
-import numpy as np
-import datetime
 
 path_data_win_konsti = os.path.join("D:", os.sep, "Geodaten", "#Jupiter", "GEO419", "data" + os.sep)
 path_data_lin_konsti = os.path.join(os.path.expanduser('~'), 'Dokumente', 'nasa_hls', 'data' + os.sep)

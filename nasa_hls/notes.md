@@ -20,3 +20,20 @@ User interface for `download_tiles:
 + download utm.kml to auxil path
 + intersect user shape with nasa tiles
 + extract for the given date
+
+## Tasks
+
+7. API development for download of Sentinel-2 and Landsat-8 data
+Contact: john.truckenbrodt@uni-jena.de
+Data:
+- NASA harmonized Sentinel-2 and Landsat-8 data (https://hls.gsfc.nasa.gov/)
+Software:
+- nasa-hls: https://github.com/benmack/nasa_hls
+### Task:
+- extension of the nasa-hls download tool with spatial querying: which tiles are (1) needed and
+which (2) available for own study area?
+- option to export a mosaic with custom extent (e.g. via shapefile) as GeoTiff making use of GDAL’s
+VRT file format
+- computation of at least three different spectral indices (e.g. NDVI, EVI, SAVI, ...)
+- visualization of mosaics in Jupyter overlaid on top of Open Street Map (see packages ipyleaflet and
+folium)
