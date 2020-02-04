@@ -17,3 +17,7 @@ from .hdf2tiff_conversion import convert_hdf2tiffs_batch
 from .download_hls_dataset import download
 from .download_hls_dataset import download_batch
 
+# robinkohrs, konstantinschellenberg edit
+from .download_tiles import download_kml, make_tiles_dataset, download_tiles
+from .make_mosaic import make_mosaic_tif
+
