@@ -6,126 +6,134 @@ import glob
 from osgeo import gdal
 import os.path
 import sys
-from nasa_hls.download_tiles import get_available_datasets_from_tiles
+sys.path.append("/home/robin/python_projects/nasa_hls")
+from nasa_hls.download_tiles import get_available_datasets_from_shape
 from nasa_hls.download_hls_dataset import download_batch
 from nasa_hls.download_tiles import path_data_lin_robin
 from nasa_hls.download_tiles import path_data_lin_konsti
+from nasa_hls.utils import BAND_NAMES
 
+gdal.UseExceptions()
 
-###################################################
-###### Classify hls-files acoording to their date
-#################################################
-# def oder_date("*.hdf")
+# make mosaic function
+def make_mosaic_tif(srcdir = path_data_lin_robin + "hdf/", dstdir = path_data_lin_robin + "mosaic/", bands = None, product = "S30"):
 
+    # get all hdf-files
+    hdf_files_list = list(glob.glob(srcdir + '*.hdf'))
 
-def download_test(path_data = path_data_lin_konsti, user_shape = path_data_lin_konsti + "dummy_region.shp"):
+    # make list of all dates in directory
+    dates_doy = []
+    for line in hdf_files_list:
+        l = line.split(".")[3][4:]
+        dates_doy.append(l)
 
-    dataset = get_available_datasets_from_tiles(user_shape=user_shape)
-    dataset_for_download = dataset.iloc[[0, 66, 202, 269], :]
+    # print list with unique
+    #print(dates_doy)
 
-    print(type(dataset_for_download))
-    download_batch(path_data, dataset_for_download)
-    return print("finished")
-
-def main():
-
+    # make a function that gets the unique entries from a list
+    # these will be the keys afterwards
+    def unique_dates(liste):
+        unique_dates = []
+        for x in liste:
+            if x not in unique_dates:
+                unique_dates.append(x)
+        return unique_dates
     
-    # make user directory
-    # download kml file in this directory
-    path = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.auxdata')
-    # check for kml download path
-    if not os.path.exists(path):
-        os.mkdir(path + '/')
+    # make the list of unique dates
+    unique_doy = unique_dates(dates_doy)
+    
+
+    # create dictionary with keys being the unique dates
+    # not yet specify the value-type
+    dataframe_dict = {date: None for date in unique_doy}
+
+    # add rows of orignial dataframe as values
+    for key in dataframe_dict.keys():
+        foo = []
+        # now go over all the files
+        for line in hdf_files_list:
+            # get the doy
+            line_date = line.split(".")[3][4:]
+            # wenn doy in der line == dem key, dann schreib es in die liste foo
+            if key == line_date:
+                foo.append(line)
+        # nachdem du über alle files gegangen bist, schreib an den key mit dem doy die aktuelle foo-liste,
+        # die nach diesem Durchgang wieder neu aufgesetzt wird
+        dataframe_dict[key] = foo
+
+    #print(dataframe_dict["311"], "\n\n")
+    #for key, item in dataframe_dict.items():
+         #print(key, item, "\n")
+
+     #check if band is specified
+    if bands is None:
+        bands = list(BAND_NAMES[product].keys())
+        long_band_names = []
+        for long_band_name in bands:
+            band = BAND_NAMES[product][long_band_name]
+            long_band_names.append(band)
     else:
-        pass
-
+        long_band_names = bands
+        
     
 
-    # here the user shapes should be placed
-    path_data = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.data')
-    if not os.path.exists(path_data):
-        os.mkdir(path_data + "/")
-    else:
-        pass
+    for key in dataframe_dict.keys():
+        for band in long_band_names:
+            hdf_list = dataframe_dict[key]
+            hdf_file_bands = []
+            for hdf_file in hdf_list:
+                filename = 'HDF4_EOS:EOS_GRID:"{0}":Grid:{1}'.format(hdf_file, band)
+                hdf_file_bands.append(filename)
 
+            #print("\n".join(hdf_file_bands))
+            # make mosaics for each band for each date
+            vrt_path = os.path.join(path_data_lin_robin, "mosaic/" + key + band + ".vrt")
+            build_vrt = gdal.BuildVRT(vrt_path, hdf_file_bands)
+            build_vrt = None
 
+    dates_dict = {date: None for date in unique_doy}
 
-
-        for i in nrow(datasets):
-            dstdir = dstdir + i
-            download_batch(dstdir)
-
-
-
-    # get directory of hdfs
-    # load hdfs in vrt
-    # load shape in vrt
-    # make mosaic of hdfs
-    # crop mosaic with shape
-    # export to directory of hdfs
-
-    # get the user directory for the hdf path
-    print("plese specidfy the directory for the hdfs")
-    hdf_dir = str(input())
+    # list of vrts
+    vrts_path = os.path.join(path_data_lin_robin, "mosaic/")
+    vrts = list(glob.glob(vrts_path + "*.vrt"))
+    
+    #print(vrts)
     
 
-    # make list with all the .hdf files in the directory
-    hdf_dir = "/home/robin/python_projects/data/nasa_hls/hdf_tiles/"
-    # "/home/robin/python_projects/data/nasa_hls/hdf_tiles"
-    hdf_path = list(glob.glob(os.path.join(hdf_dir, '*.hdf')))
+    for key in dates_dict.keys():
+        files = []
+        for single_file in vrts:
+            doy = single_file.split("/")[-1][0:3]
+            if key == doy:
+                files.append(single_file)
 
-    # make list with gdal datasets
-    # gdal_datasets = []
-    # for i in hdf_path:
-    #     dataset = gdal.Open(i)
-    #     gdal_datasets.append(dataset)
+        dates_dict[key] = files
 
-    # build vrt with all from all the -hdf files specified
-    # print("making vrt")
-    # vrt_path = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.data', "hls.vrt")
-    # vrt = gdal.BuildVRT(vrt_path, gdal_datasets)
 
-    # shape path
-    # shp_path = '/home/robin/python_projects/data/nasa_hls/test_shape/dummy_region.shp'
+    ######is
+    #print the dict
+    #####
+    #for keys, items in dates_dict.items():
+    #    print(keys, items, "\n")
+    #print dictionary nicely
+    #print("\n".join("{}\t{}".format(k, v) for k, v in dates_dict.items()))
+    #print(len(dates_dict))
 
-    ###############
-    ####### Mak VRT
-    ################
-
-    # set vrt-options. Don't know why, but on the command line requires different projections
-    vrtoptions = gdal.BuildVRTOptions(allowProjectionDifference=True, separate=True)
-    vrt_path = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.data', "final_py.vrt")
-    print("the path where your vrt and final tiff will be is: \n {path}".format(path = vrt_path))
-
-    # make vrt 
-    final_vrt = gdal.BuildVRT(vrt_path, hdf_path, options=vrtoptions)
-
-    #get projection
-    projection = final_vrt.GetProjection()
-
-    # reproject vrt
-    final_vrt = gdal.Warp(vrt_path, final_vrt, dstSRS=projection)
-    final_vrt = None
-
-    # convert vrt to tiff
-    final_tif = gdal.Translate(os.path.join(path_data + "/" + "final2.tiff"), vrt_path, projWinSRS=projection)
-    print("\nfinal tif created \n")
-    print("Now proceed to clipping \n")
-
-    # use Johns spatialist to clip
-    # from pyroSAR.auxdata import dem_autoload
-    # with Vector(shp_path) as site:
-    #     dem_autoload([site], 'SRTM 1Sec HGT', vrt=vrt)
-    # result.tif
-    #with Vector(shp_path) as site:
-    #    with Raster('result.tif')[site] as ras:
-    #        mat = ras.array()
-
-    return None
-
-if __name__ == "__main__":
-    main()
+    for date in dates_dict.keys():
+        print(date)
+        vrts_per_date = dates_dict[date]
+        vrt_path = os.path.join(path_data_lin_robin + date + "final.vrt")
+        single_vrt = gdal.BuildVRT(vrt_path, vrts_per_date, separate=True)
+        tiff_path = os.path.join(path_data_lin_robin + date + ".tiff")
+        final_tif = gdal.Translate(tiff_path, single_vrt)
 
 
 
+
+
+
+
+            # final_tif = gdal.Translate(os.path.join(path_data_lin_robin + "mosaic/" + key + band + ".tiff"), build_vrt)
+            # final_tif = None
+            # build_vrt = None
 
