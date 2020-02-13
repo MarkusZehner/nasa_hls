@@ -364,4 +364,3 @@ def _get_directories_in_directories(url_list, href_match):
     for url in tqdm(url_list, total=len(url_list)):
         urls_new += _get_directories(url, href_match)
     return urls_new
-
