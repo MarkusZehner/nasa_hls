@@ -2,14 +2,16 @@ import os
 import glob
 from osgeo import gdal
 
-from nasa_hls.download_tiles import path_auxil
-from nasa_hls.utils import BAND_NAMES
+from .download_tiles import path_auxil
+from .utils import BAND_NAMES
 
 gdal.UseExceptions()
 
 def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30"):
+    
     # get all hdf-files
     hdf_files_list = list(glob.glob(srcdir + '*.hdf'))
+    print(hdf_files_list)
 
     # make list of all dates in directory
     dates_doy = []
@@ -113,10 +115,18 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30"):
         print(date)
 
         vrts_per_date = dates_dict[date]
+        # Order Products here!! QA as last
+        # print(vrts_per_date)
         vrt_path = os.path.join(vrt_days + date + "final.vrt")
 
         single_vrt = gdal.BuildVRT(vrt_path, vrts_per_date, separate=True)
+
         tiff_path = os.path.join(dstdir + date + ".tiff")
-        final_tif = gdal.Translate(tiff_path, single_vrt)
+        all_tif = gdal.Translate(tiff_path, single_vrt)
+        #https://gis.stackexchange.com/questions
+        # gdalwarp -cutline dummy_region.shp -crop_to_cutline -dstalpha 007.tiff masked.tiff --> worked
+        #warp_options = [cropToCutline=TRUE, dstAlpha = True]
+        #final_tif = gdal.Warp(all_tif, "path_to_shape", out_tif )
+
         # final_tif = None
         # single_vrt = None
