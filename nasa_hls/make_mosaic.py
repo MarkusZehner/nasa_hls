@@ -7,11 +7,14 @@ from .utils import BAND_NAMES
 
 gdal.UseExceptions()
 
+
 def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30"):
+
+    options = gdal.BuildVRTOptions(separate=True)
     
     # get all hdf-files
     hdf_files_list = list(glob.glob(srcdir + '*.hdf'))
-    print(hdf_files_list)
+    #print(hdf_files_list)
 
     # make list of all dates in directory
     dates_doy = []
@@ -19,7 +22,7 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30"):
         l = line.split(".")[3][4:]
         dates_doy.append(l)
 
-    print(dates_doy)
+    #print(dates_doy)
 
     # make a function that gets the unique entries from a list
     # these will be the keys afterwards
@@ -79,54 +82,93 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30"):
             # print("\n".join(hdf_file_bands))
             # make mosaics for each band for each date
             vrt_path = os.path.join(path_auxil + "mosaic/bands/" + key + band + ".vrt")
-            build_vrt = gdal.BuildVRT(vrt_path, hdf_file_bands)
+            build_vrt = gdal.BuildVRT(vrt_path, hdf_file_bands, options = options)
             build_vrt = None
-
-    dates_dict = {date: None for date in unique_doy}
+    
+    #depricated??!
+    #dates_dict = {date: None for date in unique_doy}
 
     # list of vrts
+    print("the unique days are: \n", unique_doy, "\n")
+    print("now all the vrts\n")
     vrts = list(glob.glob(path_auxil + "mosaic/bands/" + "*.vrt"))
+    print(vrts)
 
-    # print(vrts)
+    # make list of bands
+    days = []
+    for i in unique_doy:
+        days_unique = []
+        for j in vrts:
+            if j.split(".")[2][-9:-6] == i:
+                days_unique.append(j)
+            
+        days.append(days_unique)
 
-    for key in dates_dict.keys():
-        files = []
-        for single_file in vrts:
-            doy = single_file.split("/")[-1][0:3]
-            if key == doy:
-                files.append(single_file)
+    print("this is days[0]", "\n", days[0])
+    # get band in every string for sorting
+    def getBand(foo):
+        """
+        param: foo (string)
+        """
+        return foo.split(".")[2][-2:]
 
-        dates_dict[key] = files
+    for i in days:
+        i.sort(key = getBand)
 
-    ######is
-    # print the dict
-    #####
-    # for keys, items in dates_dict.items():
-    #    print(keys, items, "\n")
-    # print dictionary nicely
-    # print("\n".join("{}\t{}".format(k, v) for k, v in dates_dict.items()))
-    # print(len(dates_dict))
-
+    
+    #make final vrts and tifs
     if not os.path.exists(path_auxil + "mosaic/days/"):
         os.makedirs(os.path.join(path_auxil + "mosaic/days/"))
     vrt_days = os.path.join(path_auxil + "mosaic/days/")
 
-    for date in dates_dict.keys():
-        print(date)
+    for i in days:
+        #print("\n\n\n", "this is i" , "\n", i)
+        vrt_path = os.path.join(vrt_days + i[0][-13:-10] + "final.vrt")
+        #print(vrt_path)
+        single_vrt = gdal.BuildVRT(vrt_path, i, options = options)
+        tiff_path = os.path.join(dstdir + i[0][-13:-10] + ".tiff")
+        tif = gdal.Translate(tiff_path, single_vrt)
 
-        vrts_per_date = dates_dict[date]
-        # Order Products here!! QA as last
-        # print(vrts_per_date)
-        vrt_path = os.path.join(vrt_days + date + "final.vrt")
 
-        single_vrt = gdal.BuildVRT(vrt_path, vrts_per_date, separate=True)
+    # # print(vrts)
+    # for key in dates_dict.keys():
+    #     files = []
+    #     for single_file in vrts:
+    #         doy = single_file.split("/")[-1][0:3]
+    #         if key == doy:
+    #             files.append(single_file)
 
-        tiff_path = os.path.join(dstdir + date + ".tiff")
-        all_tif = gdal.Translate(tiff_path, single_vrt)
-        #https://gis.stackexchange.com/questions
-        # gdalwarp -cutline dummy_region.shp -crop_to_cutline -dstalpha 007.tiff masked.tiff --> worked
-        #warp_options = [cropToCutline=TRUE, dstAlpha = True]
-        #final_tif = gdal.Warp(all_tif, "path_to_shape", out_tif )
+    #     dates_dict[key] = files
 
-        # final_tif = None
-        # single_vrt = None
+    # ######is
+    # # print the dict
+    # #####
+    # # for keys, items in dates_dict.items():
+    # #    print(keys, items, "\n")
+    # # print dictionary nicely
+    # # print("\n".join("{}\t{}".format(k, v) for k, v in dates_dict.items()))
+    # # print(len(dates_dict))
+
+    # if not os.path.exists(path_auxil + "mosaic/days/"):
+    #     os.makedirs(os.path.join(path_auxil + "mosaic/days/"))
+    # vrt_days = os.path.join(path_auxil + "mosaic/days/")
+
+    # for date in dates_dict.keys():
+    #     print(date)
+
+    #     vrts_per_date = dates_dict[date]
+    #     # Order Products here!! QA as last
+    #     # print(vrts_per_date)
+    #     vrt_path = os.path.join(vrt_days + date + "final.vrt")
+
+    #     single_vrt = gdal.BuildVRT(vrt_path, vrts_per_date, separate=True)
+
+    #     tiff_path = os.path.join(dstdir + date + ".tiff")
+    #     all_tif = gdal.Translate(tiff_path, single_vrt)
+    #     #https://gis.stackexchange.com/questions
+    #     # gdalwarp -cutline dummy_region.shp -crop_to_cutline -dstalpha 007.tiff masked.tiff --> worked
+    #     #warp_options = [cropToCutline=TRUE, dstAlpha = True]
+    #     #final_tif = gdal.Warp(all_tif, "path_to_shape", out_tif )
+
+    #     # final_tif = None
+    #     # single_vrt = None
