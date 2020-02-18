@@ -91,27 +91,37 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30"):
     # list of vrts
     print("the unique days are: \n", unique_doy, "\n")
     print("now all the vrts\n")
+    # PROBLEM: Glob doesn't take the bands in sequence... So sorting later needed to restore band order
     vrts = list(glob.glob(path_auxil + "mosaic/bands/" + "*.vrt"))
     print(vrts)
 
-    # make list of bands
+    # make list of list of bands for each day
     days = []
     for i in unique_doy:
+        print(i)
         days_unique = []
         for j in vrts:
-            if j.split(".")[2][-9:-6] == i:
-                days_unique.append(j)
+            print(j.split(".")[2][-9:-6])
+            print(j.split(".")[2][-9:])
+            if len(j) == 57: #risky
+                if j.split(".")[2][-9:-6] == i:
+                    days_unique.append(j)
+            if len(j) != 57:
+                if j.split(".")[2][-5:-2] == i:
+                    days_unique.append(j)
+
             
         days.append(days_unique)
-
+    
     print("this is days[0]", "\n", days[0])
-    # get band in every string for sorting
+    # get band character in every string for sorting
     def getBand(foo):
         """
         param: foo (string)
         """
         return foo.split(".")[2][-2:]
 
+    # sort band-vrts for each day
     for i in days:
         i.sort(key = getBand)
 
