@@ -2,6 +2,7 @@ import os
 import urllib
 import geopandas as gp
 import pandas as pd
+import itertools
 
 from .utils import get_available_datasets
 from .download_hls_dataset import download_batch
@@ -48,12 +49,13 @@ def get_available_datasets_from_shape(products=None,
     shape and the UTM tiles.
     """
 
-    if years is None:
-        years = [2018]
-
     shape = gp.read_file(shape)
 
+    print(shape.head(5))
+    
+
     if "Name" in shape:
+        print("name")
         shape = shape.rename(columns={"Name": "name_shape"})
 
     gp.io.file.fiona.drvsupport.supported_drivers['KML'] = 'rw'  # Enable fiona driver, read in utm grid from kml
@@ -66,23 +68,65 @@ def get_available_datasets_from_shape(products=None,
     # write UTM-codes in list
     tiles = match["Name"].tolist()
 
+    print(products)
+    print(years)
+    print(tiles)
+    print("\n\n")
+
     print("\ngetting available datasets . . .")
     datasets = get_available_datasets(products=products, years=years, tiles=tiles, return_list=False)
 
     return datasets
 
 
-def make_tiles_dataset(shape=None,
+def make_tiles_dataset(shape,
                        products=None,
                        date=None,
                        year=None,
                        start_date=None,
                        end_date=None):
-    """
-    :param: shape, products, date, year, start_date, end_date
-    :return: dataset(s). contains date specific tiles in the spatial extent of the input shape.
-    can be ingested by download_batch. Returns list when time span is specified
-    """
+
+    '''  Make a list of pandas dataframas. Each row in the dataframe is one scene and can be given to the function download_tiles
+    
+    Parameters
+    ---------- 
+    param1: shape
+         The shpefile of your AOI. Expects the full path in form of a string. No default, so needs to be set.
+    
+    param2: products (optional)
+         A list that contains either ["L30"] for Landsat, or ["S30"] for Sentinel. If nothing is specified, programm will search for Landsat.
+    
+    param3: date (optional)
+         If you want data for only on day of the year, provide input here in the form "yyyy-mm-dd" (e.g. "2018-02-03"). No need to futher specify any parameter
+         Default is None. If not specified, will look for next parameter: year
+
+    param4: year (optional)
+         if you want the data for a whole year provide a year in the form: "yyyy-mm-dd". If provided, no need to further specify any paramter. Default is None.
+    
+    param5: start_date (optional)
+         if you are interested in data only after a certain date. Provide start_date in the form: "yyyy-mm-dd". If you want a certain period of the year, combine it 
+         with end_date. If start_date and not end_date, will look for all datasets from start_date to end of year.
+    param6: end_date (optional)
+        If you are interested in data only before a certain date. Provide in the form: "yyyy-mm-dd". For a certain period combine it with start_date. 
+        If provided without start_date, will look for all datasets before a certain date. 
+    
+    Returns
+    -------
+    result: `bool`
+        description
+    
+    
+    Notes
+    -----
+    
+    You Need to provide at least one of the date options (date, year, start_date, end_date). You can provide anyone of them in single. If you want data
+    data for a certrain period, work with start_date and end_date. If not provided any date-information, will take 2018.
+
+    ''' 
+
+
+    if not isinstance(shape, str):
+        raise TypeError("parameter 'shape' must be of type str")
 
     try:
         # convert given dates to pd.timestamp
@@ -114,7 +158,6 @@ def make_tiles_dataset(shape=None,
         # timestamp = pd.to_datetime(date)
         # year_int = timestamp.year
         yyyy = [date_timestamp.year]
-
     else:
         if start_date is not None:
             yyyy = [start_date.year]
@@ -123,14 +166,19 @@ def make_tiles_dataset(shape=None,
         else:
             yyyy = [year]
 
+    
     # for "debugging" purposes
     # print("""the function reached this point and the parameter provided to get_available_datasets_from_shape are:
     # \n\n {products}, \n\n {shape}, "\n\n", {years}""".format(products = products, shape = shape, years = yyyy))
 
     df = get_available_datasets_from_shape(products=products, shape=shape, years=yyyy)
+
+   
     # SPLIT DATAFRAME AS USER DATE INPUT  . . .
     dictionary = dates_to_dict(df)
 
+    
+    
     # 1 Dataframe is 1 Date and can consist of up to 4 rows(Scenes)!!!
     # make list with all the dataframe the user wants
     dataframes = []
@@ -188,6 +236,36 @@ def download_tiles(dstdir=None, dataframes=None):
 
 
 def dates_to_dict(df):
+
+    ''' Converts dataframeframe given by get_available_datasets_from_shape into an ordered (by day of year) dictionary. 
+        Keys are the days, values are dataframes for each day.
+    
+    Parameters
+    ---------- 
+    param1: df
+         Expects a dataframe in the format:
+          product   tile       date                                                url
+0       S30  32TQT 2018-01-01  https://hls.gsfc.nasa.gov/data/v1.4/S30/2018/3...
+
+    Returns
+    -------
+    dictionary: keys  are of class <class 'datetime.date'>  (e.g.datetime.date(2018, 1, 1))
+                values are of class <class 'pandas.core.frame.DataFrame'> 
+    
+    Examples
+    --------
+    for accessing a certain day (key)
+    import datetime
+    x = datetime.datetime(2018,12,22).date()
+    dic = dates_to_dict(df)
+    print(dic[x])
+
+
+    Notes
+    -----
+    
+    
+    ''' 
     # sort dataframe by date
     df_sorted = df.sort_values(by=["date"])
 

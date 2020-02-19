@@ -237,12 +237,12 @@ def make_mosaic2(srcdir=None, dstdir=None, bands=None, product="S30", shape = No
                 tiff_path = os.path.join(dstdir + i[0][-9:-6] + ".tiff")
                 tif = gdal.Translate(tiff_path, single_vrt)
             else:
+                print("in else")
                 vrt_path = os.path.join(vrt_days + i[0][-10:-7] + "final.vrt")
                 #print(vrt_path)
                 single_vrt = gdal.BuildVRT(vrt_path, i, options = options)
-                #TODO: call subprocesses
                 tiff_path = os.path.join(dstdir + i[0][-10:-7] + ".tiff")
-                cmd = "gdalwarp -srcnodata -1000 -cutline {shape} {single_vrt} {tiff_path}".format(shape = shape, single_vrt = single_vrt, tiff_path = tiff_path)        
-                subprocess.call(cmd)
+                cmd= "gdalwarp -srcnodata '-1000 -255' -cutline {shape} {vrt_path} {tiff_path}".format(shape = shape, vrt_path = vrt_path, tiff_path = tiff_path)        
+                subprocess.call(cmd, shell=True)
                 #tif = gdal.Translate(tiff_path, single_vrt)
 
