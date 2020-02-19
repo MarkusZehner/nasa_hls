@@ -99,13 +99,13 @@ def make_tiles_dataset(shape=None,
     if products is None:
         products = ["S30"]
     if date:
-        print("single date: {date}\n ".format(date=date))
+        print("\nsingle date: {date}\n ".format(date=date))
     if start_date:
-        print("starting date: {date}\n ".format(date=start_date))
+        print("\nstarting date: {date}\n ".format(date=start_date))
     if end_date:
-        print("end date: {date}\n ".format(date=end_date))
+        print("\nend date: {date}\n ".format(date=end_date))
     if year:
-        print("year: {year}".format(year=year))
+        print("\nyear: {year}".format(year=year))
 
     # get the year (any year!!) in the format that get_available_datasets needs
     # we need a year to trigger the function of ben mack
@@ -169,7 +169,6 @@ def make_tiles_dataset(shape=None,
     else:
         print("Something is wrong with your dates")
 
-    data
 
     return dataframes
 
