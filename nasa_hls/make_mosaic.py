@@ -1,15 +1,21 @@
 import os
 import glob
 from osgeo import gdal
+import subprocess
 
-from nasa_hls.download_tiles import path_auxil
-from nasa_hls.utils import BAND_NAMES
+from .download_tiles import path_auxil
+from .utils import BAND_NAMES
 
 gdal.UseExceptions()
 
-def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30"):
+
+def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape = None):
+
+    options = gdal.BuildVRTOptions(separate=True)
+    
     # get all hdf-files
     hdf_files_list = list(glob.glob(srcdir + '*.hdf'))
+    #print(hdf_files_list)
 
     # make list of all dates in directory
     dates_doy = []
@@ -17,7 +23,7 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30"):
         l = line.split(".")[3][4:]
         dates_doy.append(l)
 
-    print(dates_doy)
+    #print(dates_doy)
 
     # make a function that gets the unique entries from a list
     # these will be the keys afterwards
@@ -66,57 +72,180 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30"):
     if not os.path.exists(path_auxil + "mosaic/bands/"):
         os.makedirs(os.path.join(path_auxil + "mosaic/bands/"))
 
-    for key in dataframe_dict.keys():
-        for band in long_band_names:
-            hdf_list = dataframe_dict[key]
-            hdf_file_bands = []
-            for hdf_file in hdf_list:
-                filename = 'HDF4_EOS:EOS_GRID:"{0}":Grid:{1}'.format(hdf_file, band)
-                hdf_file_bands.append(filename)
 
-            # print("\n".join(hdf_file_bands))
-            # make mosaics for each band for each date
-            vrt_path = os.path.join(path_auxil + "mosaic/bands/" + key + band + ".vrt")
-            build_vrt = gdal.BuildVRT(vrt_path, hdf_file_bands)
-            build_vrt = None
+    ##################
+    #Check if Sentinel or Landsat
+    ##################
+    if product == "L30":
 
-    dates_dict = {date: None for date in unique_doy}
+        for key in dataframe_dict.keys():
+            for band in long_band_names:
+                hdf_list = dataframe_dict[key]
+                hdf_file_bands = []
+                for hdf_file in hdf_list:
+                    filename = 'HDF4_EOS:EOS_GRID:"{0}":Grid:{1}'.format(hdf_file, band)
+                    hdf_file_bands.append(filename)
 
-    # list of vrts
-    vrts = list(glob.glob(path_auxil + "mosaic/bands/" + "*.vrt"))
+                # print("\n".join(hdf_file_bands))
+                # make mosaics for each band for each date
+                vrt_path = os.path.join(path_auxil + "mosaic/bands/" + key + band + ".vrt")
+                build_vrt = gdal.BuildVRT(vrt_path, hdf_file_bands, options = options)
+                build_vrt = None
+        
+        #depricated??!
+        #dates_dict = {date: None for date in unique_doy}
 
-    # print(vrts)
+        # list of vrts
+        print("the unique days for the final tiffs are are: \n", unique_doy, "\n")
+        print("now all the vrts\n")
+        # PROBLEM: Glob doesn't take the bands in sequence... So sorting later needed to restore band order
+        vrts = list(glob.glob(path_auxil + "mosaic/bands/" + "*.vrt"))
+        print(vrts)
 
-    for key in dates_dict.keys():
-        files = []
-        for single_file in vrts:
-            doy = single_file.split("/")[-1][0:3]
-            if key == doy:
-                files.append(single_file)
+        # make list of list of bands for each day
+        days = []
+        for i in unique_doy:
+            print(i)
+            days_unique = []
+            for j in vrts:
+                print(j.split(".")[2][-9:-6])
+                print(j.split(".")[2][-9:])
+                if len(j) == 57: #risky
+                    if j.split(".")[2][-9:-6] == i:
+                        days_unique.append(j)
+                if len(j) != 57:
+                    if j.split(".")[2][-5:-2] == i:
+                        days_unique.append(j)
 
-        dates_dict[key] = files
+                
+            days.append(days_unique)
+        
+        print("this is days[0]", "\n", days[0])
+        # get band character in every string for sorting
+        def getBand(foo):
+            """
+            param: foo (string)
+            """
+            return foo.split(".")[2][-2:]
 
-    ######is
-    # print the dict
-    #####
-    # for keys, items in dates_dict.items():
-    #    print(keys, items, "\n")
-    # print dictionary nicely
-    # print("\n".join("{}\t{}".format(k, v) for k, v in dates_dict.items()))
-    # print(len(dates_dict))
+        # sort band-vrts for each day
+        for i in days:
+            i.sort(key = getBand)
 
-    if not os.path.exists(path_auxil + "mosaic/days/"):
-        os.makedirs(os.path.join(path_auxil + "mosaic/days/"))
-    vrt_days = os.path.join(path_auxil + "mosaic/days/")
+        
+        #make final vrts and tifs
+        if not os.path.exists(path_auxil + "mosaic/days/"):
+            os.makedirs(os.path.join(path_auxil + "mosaic/days/"))
+        vrt_days = os.path.join(path_auxil + "mosaic/days/")
 
-    for date in dates_dict.keys():
-        print(date)
+        for i in days:
+            #print("\n\n\n", "this is i" , "\n", i)
+            vrt_path = os.path.join(vrt_days + i[0][-13:-10] + "final.vrt")
+            #print(vrt_path)
+            single_vrt = gdal.BuildVRT(vrt_path, i, options = options)
+            tiff_path = os.path.join(dstdir + i[0][-13:-10] + ".tiff")
+            tif = gdal.Translate(tiff_path, single_vrt)
+    
+    #if product = Sentinel
+    elif product == "S30":
+        print("i'm in, sentinel!!")
+        #print(dataframe_dict)
 
-        vrts_per_date = dates_dict[date]
-        vrt_path = os.path.join(vrt_days + date + "final.vrt")
+        #key is the doy, values are lists of all the hdf-files for that date
+        # {"001":[HLS...hdf, HLS...hdf.. ]}
+        #for day
+        for key in dataframe_dict.keys():
+            #long_band_names
+            #['B01', 'B02', 'B03', 'B04', 'B05', 'B07', 'B08', 'B8A', 'B10', 'B11', 'B12', 'QA']
+            print("The selected band names are: \n")
+            print("long band names: ", long_band_names)
+            #for band
+            for band in long_band_names:
+                #get the hdf files for that date in a list
+                hdf_list = dataframe_dict[key]
+                
+                
+                #go over all the bandsand mosaic the bands
+                hdf_file_bands = []
+                for hdf_file in hdf_list:
+                    filename = 'HDF4_EOS:EOS_GRID:"{0}":Grid:{1}'.format(hdf_file, band)
+                    hdf_file_bands.append(filename)
+                
+                
+        
+                # print("\n".join(hdf_file_bands))
+                # make mosaics for each band for each date
+                vrt_path = os.path.join(path_auxil + "mosaic/bands/" + key + band + ".vrt")
+                build_vrt = gdal.BuildVRT(vrt_path, hdf_file_bands, options = options)
+                build_vrt = None
+        
+        #depricated??!
+        #dates_dict = {date: None for date in unique_doy}
 
-        single_vrt = gdal.BuildVRT(vrt_path, vrts_per_date, separate=True)
-        tiff_path = os.path.join(dstdir + date + ".tiff")
-        final_tif = gdal.Translate(tiff_path, single_vrt)
-        # final_tif = None
-        # single_vrt = None
+        # list of vrts
+        print("\nthe unique days are: \n", unique_doy, "\n")
+        #print("now all the vrts\n")
+        # PROBLEM: Glob doesn't take the bands in sequence... So sorting later needed to restore band order
+        vrts = list(glob.glob(path_auxil + "mosaic/bands/" + "*.vrt"))
+        #print(vrts)
+        
+
+        # make list of list of bands for each day
+        days = []
+        for i in unique_doy:
+            #print(i)
+            days_unique = []
+            for j in vrts:
+                #print(j.split(".")[2][-5:-2])
+                if len(j) == 54: #risky
+                    #print("this is j:\n", j)
+                    if j.split(".")[2][-6:-3] == i:
+                        days_unique.append(j)
+                if len(j) != 54:
+                    if j.split(".")[2][-5:-2] == i:
+                        days_unique.append(j)
+
+                
+            days.append(days_unique)
+        
+        #print("this is days[0]", "\n", days[0])
+       
+
+        # get band character in every string for sorting
+        def getBand(foo):
+            """
+            param: foo (string)
+            """
+            return foo.split(".")[2][-5:] #TODO: might be different for Sentinel
+
+        # sort band-vrts for each day
+        for i in days:
+            i.sort(key = getBand)
+
+        
+        #make final vrts and tifs
+        if not os.path.exists(path_auxil + "mosaic/days/"):
+            os.makedirs(os.path.join(path_auxil + "mosaic/days/"))
+        vrt_days = os.path.join(path_auxil + "mosaic/days/")
+
+        for i in days:
+            #print("\n\n\n", "this is i" , "\n", i, "\n\n")
+            i.append(i.pop(0)) # der Geniestreich meines Lebens...
+            #print("\n\n\n", "this is i" , "\n", i, "\n")
+            #i[0] just to get the date info from any string
+            if "QA" in i[0]:
+                vrt_path = os.path.join(vrt_days + i[0][-9:-6] + "final.vrt") # for debugging just keep this line and outcomment the next three
+                single_vrt = gdal.BuildVRT(vrt_path, i, options = options)
+                tiff_path = os.path.join(dstdir + i[0][-9:-6] + ".tiff")
+                tif = gdal.Translate(tiff_path, single_vrt)
+            else:
+                print("in else")
+                vrt_path = os.path.join(vrt_days + i[0][-10:-7] + "final.vrt")
+                print(vrt_path)
+                #print(vrt_path)
+                single_vrt = gdal.BuildVRT(vrt_path, i, options = options)
+                tiff_path = os.path.join(dstdir + i[0][-10:-7] + ".tiff")
+                cmd= "gdalwarp -srcnodata -1000 -cutline {shape} {vrt_path} {tiff_path}".format(shape = shape, vrt_path = vrt_path, tiff_path = tiff_path)        
+                subprocess.call(cmd, shell=True)
+                #tif = gdal.Translate(tiff_path, single_vrt)
+
