@@ -10,7 +10,7 @@ gdal.UseExceptions()
 
 
 def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape=None):
-    options = gdal.BuildVRTOptions(separate=FALSE)
+    options = gdal.BuildVRTOptions(separate=False)
 
     # get all hdf-files
     hdf_files_list = list(glob.glob(srcdir + '*.hdf'))
@@ -171,7 +171,6 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape=None)
                 # make mosaics for each band for each date
                 vrt_path = os.path.join(path_auxil + "mosaic/bands/" + key + band + ".vrt")
                 build_vrt = gdal.BuildVRT(vrt_path, hdf_file_bands, options=options)
-                gdal
                 build_vrt = None
 
         # depricated??!
@@ -218,7 +217,7 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape=None)
             vrt_path = os.path.join(vrt_days + i[0][-10:-7] + "final.vrt")
             print(vrt_path)
 
-            options = gdal.BuildVRTOptions(separate=TRUE)
+            options = gdal.BuildVRTOptions(separate=True)
             single_vrt = gdal.BuildVRT(vrt_path, i, options=options)
             tiff_path = os.path.join(dstdir + i[0][-10:-7] + ".tiff")
             # cmd= "gdalwarp -srcnodata -1000 -cutline {shape} {vrt_path} {tiff_path}".format(shape = shape, vrt_path = vrt_path, tiff_path = tiff_path)
