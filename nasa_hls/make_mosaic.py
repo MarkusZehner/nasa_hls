@@ -72,10 +72,6 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape=None)
         # die nach diesem Durchgang wieder neu aufgesetzt wird
         dataframe_dict[key] = foo
 
-    # print(dataframe_dict["311"], "\n\n")
-    # for key, item in dataframe_dict.items():
-    # print(key, item, "\n")
-
     # check if band is specified
     if bands is None:
         bands = list(BAND_NAMES[product].keys())
@@ -92,7 +88,6 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape=None)
 
     if product == "L30":
         print("Landsat")
-        # TODO: more description and sync description with Sentinel loop
 
         for key in dataframe_dict.keys():
             # for day
@@ -133,17 +128,26 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape=None)
         # print(days)
 
         for i in days:
+            # concat tif and vrt path
+            tiff_path = os.path.join(dstdir + i[0][-13:-10] + ".tif")
             vrt_path = os.path.join(vrt_days + i[0][-13:-10] + "final.vrt")
-            options = gdal.BuildVRTOptions(separate=True)
-            single_vrt = gdal.BuildVRT(vrt_path, i, options=options)
             print(vrt_path)
+            print(tiff_path)
+
+            # important to separate the bands to 1,2,3 [...] -QA
+            options = gdal.BuildVRTOptions(separate=True)
+
+            # build vrt of one date
+            single_vrt = gdal.BuildVRT(vrt_path, i, options=options)
+            single_vrt = None # leave VRT
+
             # concat tif path
-            tiff_path = os.path.join(dstdir + i[0][-13:-10] + ".tiff")
 
             # cut line raster to the shape
             cmd = "gdalwarp -srcnodata -1000 -cutline {shape} {vrt_path} {tiff_path}".format(shape=shape,
                                                                                              vrt_path=vrt_path,
                                                                                              tiff_path=tiff_path)
+            print("\n", "cmd call: \n", cmd, "\n\n")
             subprocess.call(cmd, shell=True)
             # tif = gdal.Translate(tiff_path, single_vrt)
 
@@ -178,15 +182,8 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape=None)
                 build_vrt = gdal.BuildVRT(vrt_path, hdf_file_bands)
                 build_vrt = None
 
-        # depricated??!
-        # dates_dict = {date: None for date in unique_doy}
-
-        # list of vrts
-        # print("\nthe unique days are: \n", unique_doy, "\n")
-        # print("now all the vrts\n")
         # PROBLEM: Glob doesn't take the bands in sequence... So sorting later needed to restore band order
         vrts = list(glob.glob(path_auxil + "mosaic/bands/" + "*.vrt"))
-        # print(vrts, "\n\n")
 
         # make list of list of bands for each day
         days = []
@@ -203,18 +200,23 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape=None)
             i.sort(key=getBand)
 
         for i in days:
+            # concat tif and vrt path
+            tiff_path = os.path.join(dstdir + i[0][-10:-7] + ".tif")
             vrt_path = os.path.join(vrt_days + i[0][-10:-7] + "final.vrt")
             print(vrt_path)
-
-            options = gdal.BuildVRTOptions(separate=True)
-            single_vrt = gdal.BuildVRT(vrt_path, i, options=options)
-
-            # concat tif path
-            tiff_path = os.path.join(dstdir + i[0][-10:-7] + ".tiff")
             print(tiff_path)
 
+            # important to separate the bands to 1,2,3 [...] -QA
+            options = gdal.BuildVRTOptions(separate=True)
+
+            # build vrt of one date
+            single_vrt = gdal.BuildVRT(vrt_path, i, options=options)
+            single_vrt = None # leave VRT
+
             # cut line raster to the shape
-            cmd = "gdalwarp -srcnodata -1000 -cutline {shape} {vrt_path} " \
-                  "{tiff_path}".format(shape=shape, vrt_path=vrt_path, tiff_path=tiff_path)
+            cmd = "gdalwarp -srcnodata -1000 -cutline {shape} {vrt_path} {tiff_path}".format(shape=shape,
+                                                                                             vrt_path=vrt_path,
+                                                                                             tiff_path=tiff_path)
+            print("\n", "cmd call: \n",cmd, "\n\n")
             subprocess.call(cmd, shell=True)
             # tif = gdal.Translate(tiff_path, single_vrt)
