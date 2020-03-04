@@ -11,26 +11,33 @@ from .utils import BAND_NAMES
 gdal.UseExceptions()
 log = logging.getLogger(__name__)
 
+
 def make_mosaic(srcdir=None, dstdir=None, bands=None, product=None, shape=None):
     """
-    :param srcdir:
-    :param dstdir:
-    :param bands:
-    :param product:
-    :param shape: A vector geometry readable by ogr/gdal drivers
-    :return:
+    Mosaics HLS datasets either all hdf in the folder (shape=None)
+    or the precise outline a shape (shape="your_shape.shp")
+
+    :param srcdir: Source directory of .hdf files downloaded via batch_download or download_tiles.
+    Products can appear mixed in the dir.
+    :param dstdir: Directory where the tif shall be saved
+    :param bands: Choice of bands
+    :param product: "S30" and "L30" provided. If both products should be mosaicked, run make_mosaic sequentially
+    for either product. NO SUPPORT FOR BOTH AT ONCE.
+    :param shape: A vector geometry readable by ogr/gdal drivers. If no shape is given, full mosaic is made
+    :return: None
     """
     # delete folder if existed
     if os.path.exists(os.path.join(path_auxil + "mosaic")):
         shutil.rmtree(path_auxil + "mosaic")
 
     # error raising
-    try:
-        with open(shape) as src:
-            pass
-    except FileNotFoundError as exc:
-        log.exception(f"FATAL ERROR : VECTOR FILE DOES NOT EXIST")
-        return None
+    if shape is not None:
+        try:
+            with open(shape) as src:
+                pass
+        except FileNotFoundError as exc:
+            log.exception(f"FATAL ERROR : VECTOR FILE DOES NOT EXIST")
+            return None
 
     # create folders in .auxil
     os.makedirs(os.path.join(path_auxil + "mosaic/bands/"), exist_ok=True)
@@ -65,9 +72,12 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product=None, shape=None):
         l = line.split(".")[3][4:]
         dates_doy.append(l)
 
-    # make a function that gets the unique entries from a list
-    # these will be the keys afterwards
     def unique_dates(liste):
+        """
+        Gets the unique entries from a list. These will work the keys for indexing afterwards
+        :param liste:
+        :return: list of unique dates
+        """
         unique_dates = []
         for x in liste:
             if x not in unique_dates:
@@ -77,8 +87,12 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product=None, shape=None):
     # make the list of unique dates
     unique_doy = unique_dates(dates_doy)
 
-    # helper function for parsing bands and sort after it
     def getBand(string):
+        """
+        Precondition for sorting band vrts. Full paths are parsed to can Band descriptor e.g. "01" or "QA.
+        :param string:
+        :return:
+        """
         return string.split(".")[2][-2:]
 
     # create dictionary with keys being the unique dates
@@ -133,7 +147,7 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product=None, shape=None):
                 # make mosaics for each band for each date
                 vrt_path = os.path.join(vrt_bands + key + band + ".vrt")
                 build_vrt = gdal.BuildVRT(vrt_path, hdf_file_bands)
-                build_vrt = None
+                build_vrt = None  # reset vrt
 
         # PROBLEM: Glob doesn't take the bands in sequence... So sorting later needed to restore band order
         vrts = list(glob.glob(vrt_bands + "*.vrt"))
@@ -158,7 +172,7 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product=None, shape=None):
             # concat tif and vrt path
             tiff_path = os.path.join(dstdir + i[0][-13:-10] + ".tif")
             vrt_path = os.path.join(vrt_days + i[0][-13:-10] + "final.vrt")
-            print("VRT to be cropped by vector geometry: \n", vrt_path)
+            print("Final VRT: \n", vrt_path)
             print("Outfile: \n", tiff_path, "\n")
 
             # important to separate the bands to 1,2,3 [...] -QA
@@ -166,17 +180,17 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product=None, shape=None):
 
             # build vrt of one date
             single_vrt = gdal.BuildVRT(vrt_path, i, options=options)
-            single_vrt = None  # leave VRT
-
-            # concat tif path
 
             # cut line raster to the shape
-            cmd = "gdalwarp -srcnodata -1000 -cutline {shape} {vrt_path} {tiff_path}".format(shape=shape,
-                                                                                             vrt_path=vrt_path,
-                                                                                             tiff_path=tiff_path)
-            print("cmd call: \n", cmd, "\n\n")
-            subprocess.call(cmd, shell=True)
-            # tif = gdal.Translate(tiff_path, single_vrt)
+            if shape is not None:
+                single_vrt = None  # reset vrt
+
+                # concat cmd call
+                cmd = f"gdalwarp -srcnodata -1000 -cutline {shape} {vrt_path} {tiff_path}"
+                print("cmd call: \n", cmd, "\n\n")
+                subprocess.call(cmd, shell=True)
+            else:
+                gdal.Translate(tiff_path, single_vrt)
 
     ##################
     # Sentinel
@@ -207,7 +221,7 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product=None, shape=None):
                 # make mosaics for each band for each date
                 vrt_path = os.path.join(path_auxil + "mosaic/bands/" + key + band + ".vrt")
                 build_vrt = gdal.BuildVRT(vrt_path, hdf_file_bands)
-                build_vrt = None
+                build_vrt = None  # reset vrt
 
         # PROBLEM: Glob doesn't take the bands in sequence... So sorting later needed to restore band order
         vrts = list(glob.glob(path_auxil + "mosaic/bands/" + "*.vrt"))
@@ -230,7 +244,7 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product=None, shape=None):
             # concat tif and vrt path
             tiff_path = os.path.join(dstdir + i[0][-10:-7] + ".tif")
             vrt_path = os.path.join(vrt_days + i[0][-10:-7] + "final.vrt")
-            print("VRT to be cropped by vector geometry: \n", vrt_path)
+            print("Final VRT: \n", vrt_path)
             print("Outfile: \n", tiff_path, "\n")
 
             # important to separate the bands to 1,2,3 [...] -QA
@@ -238,12 +252,14 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product=None, shape=None):
 
             # build vrt of one date
             single_vrt = gdal.BuildVRT(vrt_path, i, options=options)
-            single_vrt = None  # leave VRT
 
             # cut line raster to the shape
-            cmd = "gdalwarp -srcnodata -1000 -cutline {shape} {vrt_path} {tiff_path}".format(shape=shape,
-                                                                                             vrt_path=vrt_path,
-                                                                                             tiff_path=tiff_path)
-            print("cmd call: \n", cmd, "\n\n")
-            subprocess.call(cmd, shell=True)
-            # tif = gdal.Translate(tiff_path, single_vrt)
+            if shape is not None:
+                single_vrt = None  # reset vrt
+
+                # concat cmd call
+                cmd = f"gdalwarp -srcnodata -1000 -cutline {shape} {vrt_path} {tiff_path}"
+                print("cmd call: \n", cmd, "\n\n")
+                subprocess.call(cmd, shell=True)
+            else:
+                tif = gdal.Translate(tiff_path, single_vrt)
