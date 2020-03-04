@@ -61,7 +61,9 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape=None)
 
     # helper function for parsing bands and sort after it
     def getBand(string):
-        return string.split(".")[2][-2:]
+        return string.split(os.sep)[-1][3:]
+
+    # foo.split(os.sep)[-1][3:]
 
     # create dictionary with keys being the unique dates
     # not yet specify the value-type
@@ -212,8 +214,8 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape=None)
             # concat tif and vrt path
             tiff_path = os.path.join(dstdir + i[0][-10:-7] + ".tif")
             vrt_path = os.path.join(vrt_days + i[0][-10:-7] + "final.vrt")
-            print(vrt_path)
-            print(tiff_path)
+            print("VRT to be cropped by vector geometry: \n", vrt_path)
+            print("Outfile: \n", tiff_path, "\n")
 
             # important to separate the bands to 1,2,3 [...] -QA
             options = gdal.BuildVRTOptions(separate=True)
@@ -226,6 +228,6 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape=None)
             cmd = "gdalwarp -srcnodata -1000 -cutline {shape} {vrt_path} {tiff_path}".format(shape=shape,
                                                                                              vrt_path=vrt_path,
                                                                                              tiff_path=tiff_path)
-            print("\n", "cmd call: \n", cmd, "\n\n")
+            print("cmd call: \n", cmd, "\n\n")
             subprocess.call(cmd, shell=True)
             # tif = gdal.Translate(tiff_path, single_vrt)
