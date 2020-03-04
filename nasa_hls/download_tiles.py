@@ -9,9 +9,7 @@ from nasa_hls.download_hls_dataset import download_batch
 
 # initiate auxillary file directory
 path_auxil = os.path.join(os.path.expanduser('~'), '.nasa_hls', '.auxdata' + os.sep)
-
-if not os.path.exists(path_auxil):
-    os.makedirs(path_auxil)
+os.makedirs(path_auxil, exist_ok=True)
 
 def download_kml():
     """
