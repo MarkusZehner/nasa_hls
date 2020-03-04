@@ -10,8 +10,15 @@ gdal.UseExceptions()
 
 
 def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape=None):
+    """
+    :param srcdir:
+    :param dstdir:
+    :param bands:
+    :param product:
+    :param shape:
+    :return:
+    """
     options = gdal.BuildVRTOptions(separate=False)
-
     # get all hdf-files
     hdf_files_list = list(glob.glob(srcdir + '*.hdf'))
     # print(hdf_files_list)
@@ -138,7 +145,7 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape=None)
         for i in days:
             # print("\n\n\n", "this is i" , "\n", i)
             vrt_path = os.path.join(vrt_days + i[0][-13:-10] + "final.vrt")
-            # print(vrt_path)
+            gdal.BuildVRTOptions(separate=True)
             single_vrt = gdal.BuildVRT(vrt_path, i, options=options)
             tiff_path = os.path.join(dstdir + i[0][-13:-10] + ".tiff")
             tif = gdal.Translate(tiff_path, single_vrt)
@@ -220,6 +227,6 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape=None)
             options = gdal.BuildVRTOptions(separate=True)
             single_vrt = gdal.BuildVRT(vrt_path, i, options=options)
             tiff_path = os.path.join(dstdir + i[0][-10:-7] + ".tiff")
-            # cmd= "gdalwarp -srcnodata -1000 -cutline {shape} {vrt_path} {tiff_path}".format(shape = shape, vrt_path = vrt_path, tiff_path = tiff_path)
-            # subprocess.call(cmd, shell=True)
-            tif = gdal.Translate(tiff_path, single_vrt)
+            cmd= "gdalwarp -srcnodata -1000 -cutline {shape} {vrt_path} {tiff_path}".format(shape = shape, vrt_path = vrt_path, tiff_path = tiff_path)
+            subprocess.call(cmd, shell=True)
+            # tif = gdal.Translate(tiff_path, single_vrt)
