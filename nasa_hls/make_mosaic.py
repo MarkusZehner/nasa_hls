@@ -16,16 +16,25 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape=None)
     :param dstdir:
     :param bands:
     :param product:
-    :param shape:
+    :param shape: A vector geometry readable by ogr/gdal drivers
     :return:
     """
     # delete folder if existed
     if os.path.exists(os.path.join(path_auxil + "mosaic")):
         shutil.rmtree(path_auxil + "mosaic")
 
+    # error raising
+    try:
+        with open(shape) as src:
+            pass
+    except FileNotFoundError as exc:
+        print("File does not exist")
+        return None
+
     # create folders in .auxil
     os.makedirs(os.path.join(path_auxil + "mosaic/bands/"), exist_ok=True)
     os.makedirs(os.path.join(path_auxil + "mosaic/days/"), exist_ok=True)
+    os.makedirs(dstdir, exist_ok=True)
     vrt_bands = os.path.join(path_auxil + "mosaic/bands/")
     vrt_days = os.path.join(path_auxil + "mosaic/days/")
 
@@ -131,15 +140,15 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape=None)
             # concat tif and vrt path
             tiff_path = os.path.join(dstdir + i[0][-13:-10] + ".tif")
             vrt_path = os.path.join(vrt_days + i[0][-13:-10] + "final.vrt")
-            print(vrt_path)
-            print(tiff_path)
+            print("VRT to be cropped by vector geometry: \n", vrt_path)
+            print("Outfile: \n", tiff_path, "\n")
 
             # important to separate the bands to 1,2,3 [...] -QA
             options = gdal.BuildVRTOptions(separate=True)
 
             # build vrt of one date
             single_vrt = gdal.BuildVRT(vrt_path, i, options=options)
-            single_vrt = None # leave VRT
+            single_vrt = None  # leave VRT
 
             # concat tif path
 
@@ -147,7 +156,7 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape=None)
             cmd = "gdalwarp -srcnodata -1000 -cutline {shape} {vrt_path} {tiff_path}".format(shape=shape,
                                                                                              vrt_path=vrt_path,
                                                                                              tiff_path=tiff_path)
-            print("\n", "cmd call: \n", cmd, "\n\n")
+            print("cmd call: \n", cmd, "\n\n")
             subprocess.call(cmd, shell=True)
             # tif = gdal.Translate(tiff_path, single_vrt)
 
@@ -211,12 +220,12 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape=None)
 
             # build vrt of one date
             single_vrt = gdal.BuildVRT(vrt_path, i, options=options)
-            single_vrt = None # leave VRT
+            single_vrt = None  # leave VRT
 
             # cut line raster to the shape
             cmd = "gdalwarp -srcnodata -1000 -cutline {shape} {vrt_path} {tiff_path}".format(shape=shape,
                                                                                              vrt_path=vrt_path,
                                                                                              tiff_path=tiff_path)
-            print("\n", "cmd call: \n",cmd, "\n\n")
+            print("\n", "cmd call: \n", cmd, "\n\n")
             subprocess.call(cmd, shell=True)
             # tif = gdal.Translate(tiff_path, single_vrt)
