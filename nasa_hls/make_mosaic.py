@@ -3,14 +3,15 @@ import glob
 from osgeo import gdal
 import subprocess
 import shutil
+import logging
 
 from .download_tiles import path_auxil
 from .utils import BAND_NAMES
 
 gdal.UseExceptions()
+log = logging.getLogger(__name__)
 
-
-def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape=None):
+def make_mosaic(srcdir=None, dstdir=None, bands=None, product=None, shape=None):
     """
     :param srcdir:
     :param dstdir:
@@ -28,7 +29,7 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape=None)
         with open(shape) as src:
             pass
     except FileNotFoundError as exc:
-        print("File does not exist")
+        log.exception(f"FATAL ERROR : VECTOR FILE DOES NOT EXIST")
         return None
 
     # create folders in .auxil
@@ -37,13 +38,30 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape=None)
     os.makedirs(dstdir, exist_ok=True)
     vrt_bands = os.path.join(path_auxil + "mosaic/bands/")
     vrt_days = os.path.join(path_auxil + "mosaic/days/")
-
-    # get all hdf-files
     hdf_files_list = list(glob.glob(srcdir + '*.hdf'))
+
+    # get all hdf-files from srcdir according to the product
+    # error when hdf in srcdir are not comply with HLS product
+    files = []
+    if product == "L30":
+        for line in hdf_files_list:
+            if ".L30." in line:
+                files.append(line)
+    elif product == "S30":
+        for line in hdf_files_list:
+            if ".S30." in line:
+                files.append(line)
+    else:
+        print("Please specify a product")
+        return None
+
+    if len(files) == 0:
+        log.exception(f"FATAL ERROR : COULD NOT DERIVE PRODUCT.")
+        raise ValueError(f"Could not derive the specified product {product} from hdf-files input")
 
     # make list of all dates in directory
     dates_doy = []
-    for line in hdf_files_list:
+    for line in files:
         l = line.split(".")[3][4:]
         dates_doy.append(l)
 
@@ -61,9 +79,7 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape=None)
 
     # helper function for parsing bands and sort after it
     def getBand(string):
-        return string.split(os.sep)[-1][3:]
-
-    # foo.split(os.sep)[-1][3:]
+        return string.split(".")[2][-2:]
 
     # create dictionary with keys being the unique dates
     # not yet specify the value-type
@@ -72,15 +88,15 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product="S30", shape=None)
     # add rows of orignial dataframe as values
     for key in dataframe_dict.keys():
         foo = []
-        # now go over all the files
-        for line in hdf_files_list:
-            # get the doy
+
+        for line in files:
+            # go over all the files
             line_date = line.split(".")[3][4:]
-            # wenn doy in der line == dem key, dann schreib es in die liste foo
+
             if key == line_date:
+                # get the doy
                 foo.append(line)
-        # nachdem du über alle files gegangen bist, schreib an den key mit dem doy die aktuelle foo-liste,
-        # die nach diesem Durchgang wieder neu aufgesetzt wird
+
         dataframe_dict[key] = foo
 
     # check if band is specified
