@@ -46,6 +46,9 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product=None, shape=None):
     vrt_bands = os.path.join(path_auxil + "mosaic/bands/")
     vrt_days = os.path.join(path_auxil + "mosaic/days/")
     hdf_files_list = list(glob.glob(srcdir + '*.hdf'))
+    
+    
+
 
     # get all hdf-files from srcdir according to the product
     # error when hdf in srcdir are not comply with HLS product
@@ -61,6 +64,11 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product=None, shape=None):
     else:
         print("Please specify a product")
         return None
+
+    # get year from selected files
+    year = files[0].split(os.sep)[-1].split(".")[3][0:4]
+
+
 
     if len(files) == 0:
         log.exception(f"FATAL ERROR : COULD NOT DERIVE PRODUCT.")
@@ -168,10 +176,19 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product=None, shape=None):
             i.sort(key=getBand)
         # print(days)
 
-        for i in days:
+
+        for n, i in enumerate(days):
             # concat tif and vrt path
-            tiff_path = os.path.join(dstdir + i[0][-13:-10] + ".tif")
-            vrt_path = os.path.join(vrt_days + i[0][-13:-10] + "final.vrt")
+            tiff_path = os.path.join(dstdir + product + "_" + year + "_" + i[0][-13:-10] + ".tif")
+            vrt_path = os.path.join(vrt_days + product + "_" + year + "_" + i[0][-13:-10] + "final.vrt")
+            print("Final VRT: \n", vrt_path)
+            print("Outfile: \n", tiff_path, "\n")
+
+            # print the final vrt and tiff location
+            print("-"*80)
+            print("")
+            ps = str(n + 1) + "." + "" + "GEOTiff"
+            print("\033[1m" + ps + "\033[0m")
             print("Final VRT: \n", vrt_path)
             print("Outfile: \n", tiff_path, "\n")
 
@@ -240,13 +257,22 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product=None, shape=None):
         for i in days:
             i.sort(key=getBand)
 
-        for i in days:
+        for n, i in enumerate(days):
+            print(i[0])
             # concat tif and vrt path
-            tiff_path = os.path.join(dstdir + i[0][-10:-7] + ".tif")
-            vrt_path = os.path.join(vrt_days + i[0][-10:-7] + "final.vrt")
+            tiff_path = os.path.join(dstdir + product + "_" + year + "_" + i[0][-10:-7] + ".tif")
+            print(tiff_path)
+            vrt_path = os.path.join(vrt_days + product + "_" + year + "_" + i[0][-10:-7] + "final.vrt")
+
+            # print the final vrt and tiff location
+            print("-"*80)
+            print("")
+            ps = str(n + 1) + "." + "" + "GEOTiff"
+            print("\033[1m" + ps + "\033[0m")
             print("Final VRT: \n", vrt_path)
             print("Outfile: \n", tiff_path, "\n")
-
+            
+            
             # important to separate the bands to 1,2,3 [...] -QA
             options = gdal.BuildVRTOptions(separate=True)
 
