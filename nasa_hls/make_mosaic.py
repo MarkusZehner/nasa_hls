@@ -47,10 +47,7 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product=None, shape=None):
     vrt_days = os.path.join(path_auxil + "mosaic/days/")
     hdf_files_list = list(glob.glob(srcdir + '*.hdf'))
     
-    
-
-
-    # get all hdf-files from srcdir according to the product
+        # get all hdf-files from srcdir according to the product
     # error when hdf in srcdir are not comply with HLS product
     files = []
     if product == "L30":
@@ -67,8 +64,6 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product=None, shape=None):
 
     # get year from selected files
     year = files[0].split(os.sep)[-1].split(".")[3][0:4]
-
-
 
     if len(files) == 0:
         log.exception(f"FATAL ERROR : COULD NOT DERIVE PRODUCT.")
@@ -175,7 +170,6 @@ def make_mosaic(srcdir=None, dstdir=None, bands=None, product=None, shape=None):
         for i in days:
             i.sort(key=getBand)
         # print(days)
-
 
         for n, i in enumerate(days):
             # concat tif and vrt path

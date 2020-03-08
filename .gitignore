@@ -76,10 +76,3 @@ target/
 
 # for uncontrolled stuff
 csv
-
-#venv
-venv
-/ignored/*
-
-# develop
-dev_*
