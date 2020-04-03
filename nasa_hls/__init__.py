@@ -18,6 +18,6 @@ from .download_hls_dataset import download
 from .download_hls_dataset import download_batch
 
 # robinkohrs, konstantinschellenberg edit
-from .download_tiles import download_kml, make_tiles_dataset, download_tiles
+from .download_tiles import download_kml, make_tiles_dataset, download_tiles, get_available_datasets_from_shape, dates_to_dict
 from .make_mosaic import make_mosaic
 

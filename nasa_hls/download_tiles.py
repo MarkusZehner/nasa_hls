@@ -203,6 +203,6 @@ def dates_to_dict(df):
 
     # add rows of orignial dataframe as values
     for key in dataframe_dict.keys():
-        dataframe_dict[key] = df[:][df.date == key]
+        dataframe_dict[key] = df[df["date"].dt.date == key]
 
     return dataframe_dict
