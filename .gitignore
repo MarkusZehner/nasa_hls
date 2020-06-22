@@ -74,5 +74,8 @@ target/
 *.aux.xml
 *.qgz
 
+# Jupyter Notebooks
+*.ipynb_checkpoint.ipynb
+
 # for uncontrolled stuff
 csv

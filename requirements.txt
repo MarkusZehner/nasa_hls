@@ -2,6 +2,7 @@ geopandas
 rasterio
 bs4
 pandas
+rasterio
 requests
 tqdm
 fiona
